@@ -71,7 +71,7 @@
             image-rendering: crisp-edges;
         }
 
-        /* Еле заметный виньет */
+        /* Виньетка для глубины */
         .vignette {
             position: absolute;
             top: 0;
@@ -80,9 +80,56 @@
             height: 100%;
             background: radial-gradient(circle at 50% 50%, 
                         transparent 40%, 
-                        rgba(0, 0, 0, 0.3) 100%);
+                        rgba(0, 0, 0, 0.4) 100%);
             pointer-events: none;
             z-index: 3;
+        }
+
+        /* Контейнер для субтитров */
+        .subtitles-container {
+            position: absolute;
+            bottom: 180px;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .subtitles {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 20px 25px;
+            max-width: 90%;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            word-break: break-word;
+        }
+
+        .subtitles.visible {
+            opacity: 1;
+        }
+
+        /* Эффект печатной машинки для субтитров */
+        .subtitles.typing {
+            animation: typePulse 2s infinite;
+        }
+
+        @keyframes typePulse {
+            0%, 100% { border-color: rgba(255, 255, 255, 0.15); }
+            50% { border-color: rgba(255, 255, 255, 0.4); }
         }
 
         /* Нижняя область для кнопки */
@@ -99,7 +146,7 @@
 
         /* Кнопка в стиле Outlast */
         .action-button {
-            background: rgba(255, 255, 255, 0.18); /* 18% прозрачности */
+            background: rgba(255, 255, 255, 0.18);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
             font-family: 'Arial', 'Helvetica', sans-serif;
@@ -129,7 +176,6 @@
             transform: scale(0.98);
         }
 
-        /* Легкое свечение во время воспроизведения */
         .action-button.playing {
             background: rgba(255, 255, 255, 0.22);
             border: 1px solid rgba(255, 255, 255, 0.6);
@@ -142,7 +188,7 @@
             50% { opacity: 1; }
         }
 
-        /* Маленький индикатор состояния (очень тонкий) */
+        /* Индикатор состояния */
         .state-indicator {
             position: absolute;
             top: 20px;
@@ -154,7 +200,26 @@
             z-index: 5;
         }
 
-        /* Для мобильных */
+        /* Прогресс-бар для субтитров (очень тонкий) */
+        .subtitle-progress {
+            position: absolute;
+            bottom: 160px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 21;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: width 0.1s linear;
+        }
+
         @media (max-width: 400px) {
             .action-button {
                 font-size: 20px;
@@ -164,6 +229,15 @@
             
             .bottom-area {
                 bottom: 60px;
+            }
+            
+            .subtitles-container {
+                bottom: 150px;
+            }
+            
+            .subtitles {
+                font-size: 14px;
+                padding: 15px 20px;
             }
         }
     </style>
@@ -175,11 +249,21 @@
             <img src="mouth-closed.png" alt="" id="characterImage">
         </div>
         
-        <!-- Виньетка для глубины -->
+        <!-- Виньетка -->
         <div class="vignette"></div>
         
-        <!-- Тонкий индикатор -->
+        <!-- Индикатор -->
         <div class="state-indicator" id="stateIndicator">[ standby ]</div>
+        
+        <!-- Субтитры -->
+        <div class="subtitles-container">
+            <div class="subtitles" id="subtitles"></div>
+        </div>
+        
+        <!-- Прогресс субтитров -->
+        <div class="subtitle-progress" id="subtitleProgress">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
         
         <!-- Кнопка -->
         <div class="bottom-area">
@@ -190,23 +274,32 @@
     </div>
 
     <script>
-        class OutlastStyle {
+        class OutlastWithSubtitles {
             constructor() {
                 // Элементы
                 this.image = document.getElementById('characterImage');
                 this.button = document.getElementById('actionButton');
                 this.indicator = document.getElementById('stateIndicator');
+                this.subtitles = document.getElementById('subtitles');
+                this.progressFill = document.getElementById('progressFill');
                 
                 // Аудио файлы
                 this.audioFiles = {
-                    hello: 'voice1.mp3',   // первая запись
-                    thanks: 'voice2.mp3'    // вторая запись
+                    hello: 'voice1.mp3',   // первая запись (короткая)
+                    thanks: 'voice2.mp3'    // вторая запись (50 секунд с текстом)
                 };
+                
+                // Текст для субтитров (второй записи)
+                this.subtitleText = "Соединение прервано. Мне жаль, что я прерываю вас, Элизабет, если вы еще помните это имя, но боюсь, вас дезинформировали. Вы здесь не для того, чтобы получить подарок, и вас не позвал сюда человек, которого вы предполагаете, хотя вас действительно позвали. Вы все были вызваны сюда, в лабиринт звуков и запахов, дезинформации и несчастий. Лабиринт без выхода, лабиринт без приза. Вы даже не понимаете, что попали в ловушку. Ваша жажда крови загнала вас в бесконечные круги, преследуя крики детей в какой-то невидимой комнате, всегда кажущейся такой близкой, но почему-то недостижимой, но вы никогда их не найдете. Никто из вас не найдет. Здесь ваша история заканчивается.";
+                
+                // Длительность второй записи в секундах
+                this.secondTrackDuration = 50; // 50 секунд
                 
                 this.currentState = 'hello'; // 'hello' или 'thanks'
                 this.isPlaying = false;
                 this.audio = new Audio();
                 this.animationInterval = null;
+                this.progressInterval = null;
                 
                 this.init();
             }
@@ -218,6 +311,7 @@
                 // События аудио
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
+                this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 
                 // Для мобильных устройств
                 document.addEventListener('touchstart', () => {
@@ -245,6 +339,11 @@
                 // Запускаем анимацию рта (0.5 секунды между кадрами)
                 this.startMouthAnimation();
                 
+                // Показываем субтитры для второй записи
+                if (this.currentState === 'thanks') {
+                    this.showSubtitles();
+                }
+                
                 // Запускаем аудио
                 const audioFile = this.audioFiles[this.currentState];
                 this.audio.src = audioFile;
@@ -253,6 +352,45 @@
                     this.stopPlayback();
                     this.indicator.textContent = '[ error ]';
                 });
+            }
+            
+            showSubtitles() {
+                // Показываем текст субтитров
+                this.subtitles.textContent = this.subtitleText;
+                this.subtitles.classList.add('visible');
+                this.subtitles.classList.add('typing');
+                
+                // Сбрасываем прогресс
+                this.progressFill.style.width = '0%';
+                
+                // Запускаем обновление прогресса
+                let startTime = Date.now();
+                this.progressInterval = setInterval(() => {
+                    if (!this.isPlaying) {
+                        clearInterval(this.progressInterval);
+                        return;
+                    }
+                    
+                    const elapsed = (Date.now() - startTime) / 1000; // секунд прошло
+                    const progress = Math.min((elapsed / this.secondTrackDuration) * 100, 100);
+                    this.progressFill.style.width = progress + '%';
+                    
+                    // Если прошло больше длительности, останавливаем
+                    if (elapsed >= this.secondTrackDuration) {
+                        clearInterval(this.progressInterval);
+                    }
+                }, 100);
+            }
+            
+            hideSubtitles() {
+                this.subtitles.classList.remove('visible');
+                this.subtitles.classList.remove('typing');
+                this.subtitles.textContent = '';
+                this.progressFill.style.width = '0%';
+                if (this.progressInterval) {
+                    clearInterval(this.progressInterval);
+                    this.progressInterval = null;
+                }
             }
             
             startMouthAnimation() {
@@ -272,7 +410,7 @@
                         this.image.style.filter = 'contrast(1.05) brightness(0.95)';
                     }
                     
-                }, 200); // 0.2 секунды
+                }, 500); // 0.5 секунды
             }
             
             stopMouthAnimation() {
@@ -284,11 +422,22 @@
                 this.image.style.filter = 'contrast(1.05) brightness(0.95)';
             }
             
+            onTimeUpdate() {
+                // Можно использовать для синхронизации, если нужно
+                if (this.currentState === 'thanks' && this.audio.duration) {
+                    const progress = (this.audio.currentTime / this.audio.duration) * 100;
+                    // Дополнительная синхронизация если нужно
+                }
+            }
+            
             onEnded() {
                 console.log('Playback ended, state:', this.currentState);
                 
                 // Останавливаем анимацию
                 this.stopMouthAnimation();
+                
+                // Прячем субтитры
+                this.hideSubtitles();
                 
                 // Меняем состояние
                 if (this.currentState === 'hello') {
@@ -311,6 +460,7 @@
             onError(e) {
                 console.error('Ошибка аудио:', e);
                 this.stopMouthAnimation();
+                this.hideSubtitles();
                 this.button.classList.remove('playing');
                 this.indicator.textContent = '[ file error ]';
                 this.isPlaying = false;
@@ -326,6 +476,7 @@
                     this.audio.currentTime = 0;
                 }
                 this.stopMouthAnimation();
+                this.hideSubtitles();
                 this.button.classList.remove('playing');
                 this.isPlaying = false;
             }
@@ -333,7 +484,7 @@
 
         // Запуск
         document.addEventListener('DOMContentLoaded', () => {
-            new OutlastStyle();
+            new OutlastWithSubtitles();
         });
     </script>
 </body>
