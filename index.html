@@ -2,344 +2,409 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Поздравительная открытка</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OPEN ME</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            -webkit-font-smoothing: none;
+            font-smooth: never;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            min-height: -webkit-fill-available;
+            background: #000000;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
             touch-action: manipulation;
+            padding: 0;
+            margin: 0;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 25px 20px;
-            border-radius: 40px;
-            max-width: 450px;
+        /* Пиксельный шум/зерно */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                rgba(0, 0, 0, 0.3) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.5;
+            animation: scanlines 8s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .game-container {
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-                       0 0 0 2px rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-            font-size: clamp(28px, 8vw, 42px);
-            margin-bottom: 20px;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            word-break: break-word;
-        }
-
-        .character-container {
-            width: min(250px, 60vw);
-            height: min(250px, 60vw);
-            margin: 10px auto 20px;
-            background: linear-gradient(145deg, #f0f0f0, #ffffff);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4),
-                       inset 0 -5px 10px rgba(0,0,0,0.1);
-            border: 4px solid white;
-            transition: transform 0.2s ease;
+            max-width: 500px;
+            height: 100vh;
+            max-height: 900px;
+            position: relative;
             overflow: hidden;
+            border: 4px solid #2a2a2a;
+            box-shadow: 0 0 0 2px #0a0a0a, 0 0 30px rgba(255, 0, 0, 0.2);
+            background: #000;
         }
 
-        .character-container:active {
-            transform: scale(0.98);
+        /* Основное изображение на весь экран */
+        .fullscreen-image {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
-        .character-image {
+        #characterImage {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            filter: contrast(1.1) brightness(0.9);
+            image-rendering: crisp-edges;
         }
 
-        /* Анимация для губ */
-        .talking {
-            animation: talk 0.15s infinite alternate;
-        }
-
-        @keyframes talk {
-            from { transform: scaleY(1); }
-            to { transform: scaleY(0.95); }
-        }
-
-        .speak-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: clamp(16px, 5vw, 20px) clamp(30px, 8vw, 50px);
-            font-size: clamp(18px, 5vw, 22px);
-            font-weight: 600;
-            border-radius: 60px;
-            cursor: pointer;
+        /* Пиксельный эффект наложения */
+        .pixel-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 350px;
-            margin: 15px auto;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5),
-                       0 5px 10px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-            -webkit-appearance: none;
-            letter-spacing: 0.5px;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .speak-button:active {
-            transform: scale(0.97);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.7);
-            background: linear-gradient(135deg, #5a6ad8 0%, #663d91 100%);
-        }
-
-        .speak-button.speaking {
-            animation: pulse 1.2s infinite;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 10px 25px rgba(255, 107, 107, 0.5);
-            }
-            50% {
-                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.9);
-            }
-        }
-
-        /* Индикатор загрузки аудио */
-        .loading-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0;
-            color: #667eea;
-            font-size: 16px;
-        }
-
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Прогресс-бар для аудио */
-        .audio-progress {
-            width: 100%;
-            height: 4px;
-            background: rgba(102, 126, 234, 0.2);
-            border-radius: 2px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.1s linear;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.02) 0px,
+                rgba(255, 255, 255, 0.02) 2px,
+                transparent 2px,
+                transparent 6px
+            );
+            pointer-events: none;
+            z-index: 3;
+            mix-blend-mode: overlay;
         }
 
-        /* Подсказка */
-        .hint {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-            margin-top: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        /* Эффект VHS/статики */
+        .static-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                        rgba(255, 0, 0, 0.05) 0%, 
+                        transparent 70%);
+            pointer-events: none;
+            z-index: 2;
+            animation: flicker 4s infinite;
         }
 
-        /* Кнопка выбора голоса (если несколько записей) */
-        .voice-selector {
+        @keyframes flicker {
+            0% { opacity: 0.3; }
+            25% { opacity: 0.5; }
+            50% { opacity: 0.2; }
+            75% { opacity: 0.4; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Нижняя панель с кнопкой */
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(
+                to top,
+                rgba(10, 0, 0, 0.95) 0%,
+                rgba(20, 0, 0, 0.8) 50%,
+                transparent 100%
+            );
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Контейнер для кнопки */
+        .help-container {
             display: flex;
-            gap: 10px;
             justify-content: center;
-            margin: 15px 0;
-            flex-wrap: wrap;
+            width: 100%;
+            pointer-events: auto;
         }
 
-        .voice-btn {
-            background: white;
-            border: 2px solid #667eea;
-            color: #667eea;
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 14px;
+        /* Кнопка HELP в стиле хоррор */
+        .help-button {
+            background: #1a0000;
+            border: none;
+            color: #8b0000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: clamp(32px, 12vw, 48px);
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            padding: 15px 40px;
             cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
+            border: 3px solid #3a0000;
+            box-shadow: 
+                0 0 0 2px #000,
+                0 0 0 5px #2a0000,
+                0 0 20px #ff0000,
+                inset 0 0 10px #4a0000;
+            text-shadow: 
+                2px 2px 0 #000,
+                0 0 10px #ff0000,
+                0 0 20px #ff0000;
+            transition: all 0.1s ease;
+            transform: skew(-2deg);
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            image-rendering: pixelated;
         }
 
-        .voice-btn.active {
-            background: #667eea;
-            color: white;
+        /* Пиксельные края кнопки */
+        .help-button::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 1px solid #600000;
+            pointer-events: none;
         }
 
-        .voice-btn:active {
-            transform: scale(0.95);
+        .help-button::after {
+            content: "";
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 1px solid #300000;
+            pointer-events: none;
         }
 
-        .hidden {
-            display: none;
+        .help-button:hover {
+            background: #2a0000;
+            color: #ff0000;
+            box-shadow: 
+                0 0 0 2px #000,
+                0 0 0 5px #3a0000,
+                0 0 30px #ff3300,
+                inset 0 0 15px #8b0000;
+            transform: skew(-2deg) scale(1.02);
         }
 
-        @media (max-width: 350px) {
-            .card {
-                padding: 15px;
+        .help-button:active {
+            transform: skew(-2deg) scale(0.98);
+            background: #3a0000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        /* Эффект нажатия для кнопки */
+        .help-button.pressed {
+            animation: buttonCrush 0.2s;
+        }
+
+        @keyframes buttonCrush {
+            0% { transform: skew(-2deg) scale(1); }
+            50% { transform: skew(-2deg) scale(0.95); }
+            100% { transform: skew(-2deg) scale(1); }
+        }
+
+        /* Счетчик нажатий (скрытый) */
+        .counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #3a0000;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 20;
+            opacity: 0.5;
+            letter-spacing: 2px;
+        }
+
+        /* Статический текст в углах */
+        .corner-text {
+            position: absolute;
+            color: #3a0000;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            z-index: 15;
+            opacity: 0.3;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .corner-tl {
+            top: 10px;
+            left: 10px;
+            transform: rotate(180deg);
+        }
+
+        .corner-br {
+            bottom: 80px;
+            right: 10px;
+        }
+
+        /* Красное мерцание при воспроизведении */
+        .red-pulse {
+            animation: redPulse 0.5s;
+        }
+
+        @keyframes redPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+            50% { box-shadow: 0 0 50px 20px rgba(255, 0, 0, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        /* Индикатор состояния */
+        .status-indicator {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            color: #2a0000;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            z-index: 15;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .status-indicator span {
+            color: #8b0000;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Для очень маленьких экранов */
+        @media (max-width: 400px) {
+            .help-button {
+                font-size: 36px;
+                letter-spacing: 4px;
+                padding: 12px 20px;
             }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .speak-button {
-                padding: 14px 20px;
-                font-size: 16px;
-            }
-        }
-
-        .no-select {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
     </style>
 </head>
 <body>
-    <div class="card no-select">
-        <h1>🎉 С ПРАЗДНИКОМ! 🎉</h1>
+    <div class="game-container">
+        <!-- Угловые тексты -->
+        <div class="corner-text corner-tl">[SYSTEM ERROR]</div>
+        <div class="corner-text corner-br">[DO NOT TURN OFF]</div>
         
-        <div class="character-container" id="characterContainer">
-            <img class="character-image" id="character" src="mouth-closed.png" alt="Персонаж">
+        <!-- Счетчик нажатий -->
+        <div class="counter" id="clickCounter">[01]</div>
+        
+        <!-- Основное изображение -->
+        <div class="fullscreen-image">
+            <img src="mouth-closed.png" alt="???" id="characterImage">
         </div>
         
-        <!-- Выбор голоса (если несколько аудиофайлов) -->
-        <div class="voice-selector" id="voiceSelector">
-            <button class="voice-btn active" data-voice="voice1">Голос 1</button>
-            <button class="voice-btn" data-voice="voice2">Голос 2</button>
+        <!-- Визуальные эффекты -->
+        <div class="pixel-overlay"></div>
+        <div class="static-effect"></div>
+        
+        <!-- Индикатор состояния -->
+        <div class="status-indicator">
+            > STATUS: <span id="statusText">IDLE</span>
         </div>
         
-        <!-- Индикатор загрузки -->
-        <div class="loading-indicator hidden" id="loadingIndicator">
-            <div class="loading-spinner"></div>
-            <span>Загрузка аудио...</span>
-        </div>
-        
-        <!-- Прогресс воспроизведения -->
-        <div class="audio-progress hidden" id="audioProgress">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-        
-        <button class="speak-button" id="speakButton">
-            <span id="buttonText">🔊 Нажать для поздравления</span>
-        </button>
-        
-        <div class="hint" id="hint">
-            👆 Нажмите на кнопку или персонажа
+        <!-- Нижняя панель с кнопкой -->
+        <div class="bottom-panel">
+            <div class="help-container">
+                <button class="help-button" id="helpButton">
+                    HELP
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        class TalkingCharacterWithAudio {
+        class HorrorGame {
             constructor() {
-                this.character = document.getElementById('character');
-                this.speakBtn = document.getElementById('speakButton');
-                this.buttonText = document.getElementById('buttonText');
-                this.characterContainer = document.getElementById('characterContainer');
-                this.hint = document.getElementById('hint');
-                this.loadingIndicator = document.getElementById('loadingIndicator');
-                this.audioProgress = document.getElementById('audioProgress');
-                this.progressBar = document.getElementById('progressBar');
-                this.voiceSelector = document.getElementById('voiceSelector');
+                // Элементы
+                this.image = document.getElementById('characterImage');
+                this.button = document.getElementById('helpButton');
+                this.counter = document.getElementById('clickCounter');
+                this.statusText = document.getElementById('statusText');
                 
-                // Настройка аудиофайлов
-                this.audioFiles = {
-                    voice1: 'congratulation1.mp3',  // Замените на свои файлы
-                    voice2: 'congratulation2.mp3'   // Замените на свои файлы
-                };
+                // Аудио файлы
+                this.audioFiles = [
+                    'voice1.mp3',  // Первая запись
+                    'voice2.mp3'   // Вторая запись
+                ];
                 
-                this.currentVoice = 'voice1';
-                this.audio = new Audio();
+                this.currentTrack = 0; // 0 или 1
+                this.clickCount = 0;
                 this.isPlaying = false;
-                this.animationInterval = null;
-                
-                // Предзагрузка аудио
-                this.preloadAudio();
+                this.audio = new Audio();
                 
                 this.init();
             }
             
             init() {
-                // Обработчики событий
-                this.speakBtn.addEventListener('click', (e) => this.togglePlayback(e));
-                this.characterContainer.addEventListener('click', () => this.togglePlayback());
+                // Предзагружаем оба аудио
+                this.preloadAudio();
                 
-                // Выбор голоса
-                document.querySelectorAll('.voice-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        this.currentVoice = btn.dataset.voice;
-                        
-                        // Если сейчас играет, переключаем на новый голос
-                        if (this.isPlaying) {
-                            this.stopPlayback();
-                            this.startPlayback();
-                        }
-                    });
-                });
+                // Обработчик кнопки
+                this.button.addEventListener('click', () => this.onButtonClick());
                 
                 // События аудио
                 this.audio.addEventListener('play', () => this.onPlay());
-                this.audio.addEventListener('pause', () => this.onPause());
                 this.audio.addEventListener('ended', () => this.onEnded());
-                this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 this.audio.addEventListener('error', (e) => this.onError(e));
-                this.audio.addEventListener('waiting', () => this.onWaiting());
-                this.audio.addEventListener('canplay', () => this.onCanPlay());
                 
                 // Для мобильных устройств
                 document.addEventListener('touchstart', () => {
-                    // Разрешаем аудио на мобильных устройствах
+                    // Активация аудио на iOS
                 }, { once: true });
             }
             
             preloadAudio() {
-                // Предзагружаем первый файл
-                this.audio.src = this.audioFiles[this.currentVoice];
-                this.audio.load();
+                // Предзагружаем файлы
+                this.audioFiles.forEach(file => {
+                    const audio = new Audio();
+                    audio.src = file;
+                    audio.preload = 'auto';
+                });
             }
             
-            togglePlayback() {
+            onButtonClick() {
+                // Анимация нажатия
+                this.button.classList.add('pressed');
+                setTimeout(() => {
+                    this.button.classList.remove('pressed');
+                }, 200);
+                
+                // Эффект красной вспышки
+                document.querySelector('.game-container').classList.add('red-pulse');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('red-pulse');
+                }, 300);
+                
                 if (this.isPlaying) {
                     this.stopPlayback();
                 } else {
@@ -348,131 +413,73 @@
             }
             
             startPlayback() {
-                if (this.isPlaying) return;
+                // Переключаем трек (0 -> 1, 1 -> 0)
+                this.currentTrack = this.clickCount % 2;
                 
-                this.showLoading(true);
+                // Обновляем текст на кнопке (добавляем номер)
+                this.button.textContent = `HELP [${this.currentTrack + 1}]`;
                 
-                // Устанавливаем текущий аудиофайл
-                if (this.audio.src !== this.audioFiles[this.currentVoice]) {
-                    this.audio.src = this.audioFiles[this.currentVoice];
-                    this.audio.load();
-                }
+                // Увеличиваем счетчик
+                this.clickCount++;
+                this.counter.textContent = `[${String(this.clickCount).padStart(2, '0')}]`;
                 
-                // Пытаемся воспроизвести
-                const playPromise = this.audio.play();
+                // Меняем статус
+                this.statusText.textContent = 'PLAYING';
                 
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log('Ошибка воспроизведения:', error);
-                        this.showLoading(false);
-                        
-                        // Для iOS показываем подсказку
-                        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                            alert('Нажмите на экран еще раз, чтобы разрешить звук');
-                        }
-                    });
-                }
+                // Открываем рот
+                this.image.src = 'mouth-open.png';
+                
+                // Запускаем аудио
+                this.audio.src = this.audioFiles[this.currentTrack];
+                this.audio.play().catch(e => {
+                    console.log('Ошибка воспроизведения:', e);
+                    this.image.src = 'mouth-closed.png';
+                    this.statusText.textContent = 'ERROR';
+                });
+                
+                this.isPlaying = true;
             }
             
             stopPlayback() {
                 this.audio.pause();
                 this.audio.currentTime = 0;
-                this.stopAnimation();
-                this.updateUIForStop();
+                this.image.src = 'mouth-closed.png';
+                this.button.textContent = 'HELP';
+                this.statusText.textContent = 'IDLE';
+                this.isPlaying = false;
             }
             
             onPlay() {
-                this.isPlaying = true;
-                this.showLoading(false);
-                this.audioProgress.classList.remove('hidden');
-                this.speakBtn.classList.add('speaking');
-                this.buttonText.innerHTML = '⏹ Остановить';
-                this.hint.innerHTML = '👆 Нажмите, чтобы остановить';
-                this.startAnimation();
-            }
-            
-            onPause() {
-                this.stopAnimation();
-                this.updateUIForStop();
+                console.log('Playing track', this.currentTrack + 1);
             }
             
             onEnded() {
-                this.stopAnimation();
-                this.updateUIForStop();
-                this.audioProgress.classList.add('hidden');
-                this.progressBar.style.width = '0%';
-            }
-            
-            onTimeUpdate() {
-                if (this.audio.duration) {
-                    const progress = (this.audio.currentTime / this.audio.duration) * 100;
-                    this.progressBar.style.width = progress + '%';
-                }
+                this.image.src = 'mouth-closed.png';
+                this.button.textContent = 'HELP';
+                this.statusText.textContent = 'IDLE';
+                this.isPlaying = false;
+                
+                // Легкое мерцание при окончании
+                document.querySelector('.game-container').style.animation = 'flicker 0.5s';
+                setTimeout(() => {
+                    document.querySelector('.game-container').style.animation = '';
+                }, 500);
             }
             
             onError(e) {
                 console.error('Ошибка аудио:', e);
-                this.showLoading(false);
-                alert('Не удалось загрузить аудиофайл. Проверьте наличие файла: ' + this.audioFiles[this.currentVoice]);
-                this.updateUIForStop();
-            }
-            
-            onWaiting() {
-                this.showLoading(true);
-            }
-            
-            onCanPlay() {
-                this.showLoading(false);
-            }
-            
-            startAnimation() {
-                // Анимация смены рта
-                let mouthOpen = false;
-                
-                this.animationInterval = setInterval(() => {
-                    // Синхронизируем с речью (частота смены рта)
-                    if (this.audio.played.length > 0 && !this.audio.paused) {
-                        mouthOpen = !mouthOpen;
-                        this.character.src = mouthOpen ? 'mouth-open.png' : 'mouth-closed.png';
-                        
-                        // Добавляем небольшую анимацию
-                        if (mouthOpen) {
-                            this.character.style.transform = 'scale(1.02)';
-                        } else {
-                            this.character.style.transform = 'scale(1)';
-                        }
-                    }
-                }, 120); // ~8 кадров в секунду
-            }
-            
-            stopAnimation() {
-                if (this.animationInterval) {
-                    clearInterval(this.animationInterval);
-                    this.animationInterval = null;
-                }
-                this.character.src = 'mouth-closed.png';
-                this.character.style.transform = 'scale(1)';
-            }
-            
-            updateUIForStop() {
+                this.statusText.textContent = 'AUDIO ERR';
+                this.image.src = 'mouth-closed.png';
                 this.isPlaying = false;
-                this.speakBtn.classList.remove('speaking');
-                this.buttonText.innerHTML = '🔊 Нажать для поздравления';
-                this.hint.innerHTML = '👆 Нажмите на кнопку или персонажа';
-            }
-            
-            showLoading(show) {
-                if (show) {
-                    this.loadingIndicator.classList.remove('hidden');
-                } else {
-                    this.loadingIndicator.classList.add('hidden');
-                }
+                
+                // Если файл не найден, показываем подсказку
+                alert(`Файл ${this.audioFiles[this.currentTrack]} не найден. Проверьте название файла!`);
             }
         }
 
-        // Инициализация
+        // Запуск
         document.addEventListener('DOMContentLoaded', () => {
-            new TalkingCharacterWithAudio();
+            new HorrorGame();
         });
     </script>
 </body>
