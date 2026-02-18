@@ -11,8 +11,6 @@
             box-sizing: border-box;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            -webkit-font-smoothing: none;
-            font-smooth: never;
         }
 
         body {
@@ -21,13 +19,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Arial', sans-serif;
             touch-action: manipulation;
             padding: 0;
             margin: 0;
         }
 
-        /* Пиксельный шум/зерно */
+        /* Еле заметный шум */
         body::before {
             content: "";
             position: fixed;
@@ -37,20 +35,14 @@
             height: 100vh;
             background: repeating-linear-gradient(
                 0deg,
-                rgba(0, 0, 0, 0.15) 0px,
-                rgba(0, 0, 0, 0.3) 2px,
+                rgba(255, 255, 255, 0.02) 0px,
+                rgba(255, 255, 255, 0.02) 2px,
                 transparent 2px,
                 transparent 4px
             );
             pointer-events: none;
             z-index: 2;
-            opacity: 0.5;
-            animation: scanlines 8s linear infinite;
-        }
-
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
+            opacity: 0.3;
         }
 
         .game-container {
@@ -60,8 +52,6 @@
             max-height: 900px;
             position: relative;
             overflow: hidden;
-            border: 4px solid #2a2a2a;
-            box-shadow: 0 0 0 2px #0a0a0a, 0 0 30px rgba(255, 0, 0, 0.2);
             background: #000;
         }
 
@@ -77,303 +67,155 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            filter: contrast(1.1) brightness(0.9);
+            filter: contrast(1.05) brightness(0.95);
             image-rendering: crisp-edges;
         }
 
-        /* Пиксельный эффект наложения */
-        .pixel-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.02) 0px,
-                rgba(255, 255, 255, 0.02) 2px,
-                transparent 2px,
-                transparent 6px
-            );
-            pointer-events: none;
-            z-index: 3;
-            mix-blend-mode: overlay;
-        }
-
-        /* Эффект VHS/статики */
-        .static-effect {
+        /* Еле заметный виньет */
+        .vignette {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 50% 50%, 
-                        rgba(255, 0, 0, 0.05) 0%, 
-                        transparent 70%);
+                        transparent 40%, 
+                        rgba(0, 0, 0, 0.3) 100%);
             pointer-events: none;
-            z-index: 2;
-            animation: flicker 4s infinite;
+            z-index: 3;
         }
 
-        @keyframes flicker {
-            0% { opacity: 0.3; }
-            25% { opacity: 0.5; }
-            50% { opacity: 0.2; }
-            75% { opacity: 0.4; }
-            100% { opacity: 0.3; }
-        }
-
-        /* Нижняя панель с кнопкой */
-        .bottom-panel {
+        /* Нижняя область для кнопки */
+        .bottom-area {
             position: absolute;
-            bottom: 0;
+            bottom: 80px;
             left: 0;
             width: 100%;
-            padding: 20px;
-            background: linear-gradient(
-                to top,
-                rgba(10, 0, 0, 0.95) 0%,
-                rgba(20, 0, 0, 0.8) 50%,
-                transparent 100%
-            );
+            display: flex;
+            justify-content: center;
             z-index: 10;
             pointer-events: none;
         }
 
-        /* Контейнер для кнопки */
-        .help-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            pointer-events: auto;
-        }
-
-        /* Кнопка HELP в стиле хоррор */
-        .help-button {
-            background: #1a0000;
-            border: none;
-            color: #8b0000;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: clamp(32px, 12vw, 48px);
-            font-weight: 900;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            padding: 15px 40px;
+        /* Кнопка в стиле Outlast */
+        .action-button {
+            background: rgba(255, 255, 255, 0.18); /* 18% прозрачности */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            padding: 12px 40px;
             cursor: pointer;
-            border: 3px solid #3a0000;
-            box-shadow: 
-                0 0 0 2px #000,
-                0 0 0 5px #2a0000,
-                0 0 20px #ff0000,
-                inset 0 0 10px #4a0000;
-            text-shadow: 
-                2px 2px 0 #000,
-                0 0 10px #ff0000,
-                0 0 20px #ff0000;
-            transition: all 0.1s ease;
-            transform: skew(-2deg);
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            image-rendering: pixelated;
+            pointer-events: auto;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            transition: all 0.2s ease;
+            text-transform: lowercase;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            min-width: 200px;
+            text-align: center;
         }
 
-        /* Пиксельные края кнопки */
-        .help-button::before {
-            content: "";
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .action-button:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.98);
+        }
+
+        /* Легкое свечение во время воспроизведения */
+        .action-button.playing {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: breathe 2s infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        /* Маленький индикатор состояния (очень тонкий) */
+        .state-indicator {
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border: 1px solid #600000;
-            pointer-events: none;
-        }
-
-        .help-button::after {
-            content: "";
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            border: 1px solid #300000;
-            pointer-events: none;
-        }
-
-        .help-button:hover {
-            background: #2a0000;
-            color: #ff0000;
-            box-shadow: 
-                0 0 0 2px #000,
-                0 0 0 5px #3a0000,
-                0 0 30px #ff3300,
-                inset 0 0 15px #8b0000;
-            transform: skew(-2deg) scale(1.02);
-        }
-
-        .help-button:active {
-            transform: skew(-2deg) scale(0.98);
-            background: #3a0000;
-            box-shadow: 0 0 20px #ff0000;
-        }
-
-        /* Эффект нажатия для кнопки */
-        .help-button.pressed {
-            animation: buttonCrush 0.2s;
-        }
-
-        @keyframes buttonCrush {
-            0% { transform: skew(-2deg) scale(1); }
-            50% { transform: skew(-2deg) scale(0.95); }
-            100% { transform: skew(-2deg) scale(1); }
-        }
-
-        /* Счетчик нажатий (скрытый) */
-        .counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #3a0000;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            z-index: 20;
-            opacity: 0.5;
-            letter-spacing: 2px;
-        }
-
-        /* Статический текст в углах */
-        .corner-text {
-            position: absolute;
-            color: #3a0000;
-            font-size: 10px;
-            font-family: 'Courier New', monospace;
-            z-index: 15;
-            opacity: 0.3;
+            top: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 11px;
+            font-family: 'Arial', monospace;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            z-index: 5;
         }
 
-        .corner-tl {
-            top: 10px;
-            left: 10px;
-            transform: rotate(180deg);
-        }
-
-        .corner-br {
-            bottom: 80px;
-            right: 10px;
-        }
-
-        /* Красное мерцание при воспроизведении */
-        .red-pulse {
-            animation: redPulse 0.5s;
-        }
-
-        @keyframes redPulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-            50% { box-shadow: 0 0 50px 20px rgba(255, 0, 0, 0.3); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-        }
-
-        /* Индикатор состояния */
-        .status-indicator {
-            position: absolute;
-            bottom: 100px;
-            left: 20px;
-            color: #2a0000;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-            z-index: 15;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .status-indicator span {
-            color: #8b0000;
-            animation: blink 2s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Для очень маленьких экранов */
+        /* Для мобильных */
         @media (max-width: 400px) {
-            .help-button {
-                font-size: 36px;
-                letter-spacing: 4px;
-                padding: 12px 20px;
+            .action-button {
+                font-size: 20px;
+                padding: 10px 30px;
+                min-width: 160px;
+            }
+            
+            .bottom-area {
+                bottom: 60px;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <!-- Угловые тексты -->
-        <div class="corner-text corner-tl">[SYSTEM ERROR]</div>
-        <div class="corner-text corner-br">[DO NOT TURN OFF]</div>
-        
-        <!-- Счетчик нажатий -->
-        <div class="counter" id="clickCounter">[01]</div>
-        
         <!-- Основное изображение -->
         <div class="fullscreen-image">
-            <img src="mouth-closed.png" alt="???" id="characterImage">
+            <img src="mouth-closed.png" alt="" id="characterImage">
         </div>
         
-        <!-- Визуальные эффекты -->
-        <div class="pixel-overlay"></div>
-        <div class="static-effect"></div>
+        <!-- Виньетка для глубины -->
+        <div class="vignette"></div>
         
-        <!-- Индикатор состояния -->
-        <div class="status-indicator">
-            > STATUS: <span id="statusText">IDLE</span>
-        </div>
+        <!-- Тонкий индикатор -->
+        <div class="state-indicator" id="stateIndicator">[ standby ]</div>
         
-        <!-- Нижняя панель с кнопкой -->
-        <div class="bottom-panel">
-            <div class="help-container">
-                <button class="help-button" id="helpButton">
-                    HELP
-                </button>
-            </div>
+        <!-- Кнопка -->
+        <div class="bottom-area">
+            <button class="action-button" id="actionButton">
+                hello
+            </button>
         </div>
     </div>
 
     <script>
-        class HorrorGame {
+        class OutlastStyle {
             constructor() {
                 // Элементы
                 this.image = document.getElementById('characterImage');
-                this.button = document.getElementById('helpButton');
-                this.counter = document.getElementById('clickCounter');
-                this.statusText = document.getElementById('statusText');
+                this.button = document.getElementById('actionButton');
+                this.indicator = document.getElementById('stateIndicator');
                 
                 // Аудио файлы
-                this.audioFiles = [
-                    'voice1.mp3',  // Первая запись
-                    'voice2.mp3'   // Вторая запись
-                ];
+                this.audioFiles = {
+                    hello: 'voice1.mp3',   // первая запись
+                    thanks: 'voice2.mp3'    // вторая запись
+                };
                 
-                this.currentTrack = 0; // 0 или 1
-                this.clickCount = 0;
+                this.currentState = 'hello'; // 'hello' или 'thanks'
                 this.isPlaying = false;
                 this.audio = new Audio();
+                this.animationInterval = null;
                 
                 this.init();
             }
             
             init() {
-                // Предзагружаем оба аудио
-                this.preloadAudio();
-                
                 // Обработчик кнопки
                 this.button.addEventListener('click', () => this.onButtonClick());
                 
                 // События аудио
-                this.audio.addEventListener('play', () => this.onPlay());
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 
@@ -383,103 +225,115 @@
                 }, { once: true });
             }
             
-            preloadAudio() {
-                // Предзагружаем файлы
-                this.audioFiles.forEach(file => {
-                    const audio = new Audio();
-                    audio.src = file;
-                    audio.preload = 'auto';
-                });
-            }
-            
             onButtonClick() {
-                // Анимация нажатия
-                this.button.classList.add('pressed');
-                setTimeout(() => {
-                    this.button.classList.remove('pressed');
-                }, 200);
+                // Если играет, не даем нажать снова
+                if (this.isPlaying) return;
                 
-                // Эффект красной вспышки
-                document.querySelector('.game-container').classList.add('red-pulse');
-                setTimeout(() => {
-                    document.querySelector('.game-container').classList.remove('red-pulse');
-                }, 300);
-                
-                if (this.isPlaying) {
-                    this.stopPlayback();
-                } else {
-                    this.startPlayback();
-                }
+                // Проигрываем текущее состояние
+                this.startPlayback();
             }
             
             startPlayback() {
-                // Переключаем трек (0 -> 1, 1 -> 0)
-                this.currentTrack = this.clickCount % 2;
+                this.isPlaying = true;
                 
-                // Обновляем текст на кнопке (добавляем номер)
-                this.button.textContent = `HELP [${this.currentTrack + 1}]`;
+                // Меняем индикатор
+                this.indicator.textContent = '[ playing ]';
                 
-                // Увеличиваем счетчик
-                this.clickCount++;
-                this.counter.textContent = `[${String(this.clickCount).padStart(2, '0')}]`;
+                // Добавляем класс анимации к кнопке
+                this.button.classList.add('playing');
                 
-                // Меняем статус
-                this.statusText.textContent = 'PLAYING';
-                
-                // Открываем рот
-                this.image.src = 'mouth-open.png';
+                // Запускаем анимацию рта (0.5 секунды между кадрами)
+                this.startMouthAnimation();
                 
                 // Запускаем аудио
-                this.audio.src = this.audioFiles[this.currentTrack];
+                const audioFile = this.audioFiles[this.currentState];
+                this.audio.src = audioFile;
                 this.audio.play().catch(e => {
                     console.log('Ошибка воспроизведения:', e);
-                    this.image.src = 'mouth-closed.png';
-                    this.statusText.textContent = 'ERROR';
+                    this.stopPlayback();
+                    this.indicator.textContent = '[ error ]';
                 });
+            }
+            
+            startMouthAnimation() {
+                let isOpen = false;
                 
-                this.isPlaying = true;
+                this.animationInterval = setInterval(() => {
+                    if (!this.isPlaying) return;
+                    
+                    // Меняем состояние рта каждые 0.5 секунд
+                    isOpen = !isOpen;
+                    this.image.src = isOpen ? 'mouth-open.png' : 'mouth-closed.png';
+                    
+                    // Добавляем микро-эффект при смене
+                    if (isOpen) {
+                        this.image.style.filter = 'contrast(1.1) brightness(1)';
+                    } else {
+                        this.image.style.filter = 'contrast(1.05) brightness(0.95)';
+                    }
+                    
+                }, 500); // 0.5 секунды
             }
             
-            stopPlayback() {
-                this.audio.pause();
-                this.audio.currentTime = 0;
+            stopMouthAnimation() {
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                }
                 this.image.src = 'mouth-closed.png';
-                this.button.textContent = 'HELP';
-                this.statusText.textContent = 'IDLE';
-                this.isPlaying = false;
-            }
-            
-            onPlay() {
-                console.log('Playing track', this.currentTrack + 1);
+                this.image.style.filter = 'contrast(1.05) brightness(0.95)';
             }
             
             onEnded() {
-                this.image.src = 'mouth-closed.png';
-                this.button.textContent = 'HELP';
-                this.statusText.textContent = 'IDLE';
-                this.isPlaying = false;
+                console.log('Playback ended, state:', this.currentState);
                 
-                // Легкое мерцание при окончании
-                document.querySelector('.game-container').style.animation = 'flicker 0.5s';
-                setTimeout(() => {
-                    document.querySelector('.game-container').style.animation = '';
-                }, 500);
+                // Останавливаем анимацию
+                this.stopMouthAnimation();
+                
+                // Меняем состояние
+                if (this.currentState === 'hello') {
+                    // После hello переключаем на thanks
+                    this.currentState = 'thanks';
+                    this.button.textContent = 'thanks';
+                    this.indicator.textContent = '[ ready ]';
+                } else {
+                    // После thanks возвращаем на hello
+                    this.currentState = 'hello';
+                    this.button.textContent = 'hello';
+                    this.indicator.textContent = '[ standby ]';
+                }
+                
+                // Убираем класс анимации
+                this.button.classList.remove('playing');
+                this.isPlaying = false;
             }
             
             onError(e) {
                 console.error('Ошибка аудио:', e);
-                this.statusText.textContent = 'AUDIO ERR';
-                this.image.src = 'mouth-closed.png';
+                this.stopMouthAnimation();
+                this.button.classList.remove('playing');
+                this.indicator.textContent = '[ file error ]';
                 this.isPlaying = false;
                 
-                // Если файл не найден, показываем подсказку
-                alert(`Файл ${this.audioFiles[this.currentTrack]} не найден. Проверьте название файла!`);
+                // Проверка на наличие файлов
+                const fileName = this.audioFiles[this.currentState];
+                alert(`Файл ${fileName} не найден. Проверьте название файла!`);
+            }
+            
+            stopPlayback() {
+                if (this.audio) {
+                    this.audio.pause();
+                    this.audio.currentTime = 0;
+                }
+                this.stopMouthAnimation();
+                this.button.classList.remove('playing');
+                this.isPlaying = false;
             }
         }
 
         // Запуск
         document.addEventListener('DOMContentLoaded', () => {
-            new HorrorGame();
+            new OutlastStyle();
         });
     </script>
 </body>
