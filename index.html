@@ -19,7 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Arial', sans-serif;
+            font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
             touch-action: manipulation;
             padding: 0;
             margin: 0;
@@ -47,12 +47,13 @@
 
         .game-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 390px; /* iPhone 14 width */
             height: 100vh;
-            max-height: 900px;
+            max-height: 844px; /* iPhone 14 height */
             position: relative;
             overflow: hidden;
             background: #000;
+            margin: 0 auto;
         }
 
         /* Основное изображение на весь экран */
@@ -85,13 +86,13 @@
             z-index: 3;
         }
 
-        /* Контейнер для субтитров */
+        /* Контейнер для динамических субтитров */
         .subtitles-container {
             position: absolute;
             bottom: 180px;
             left: 0;
             width: 100%;
-            padding: 20px;
+            padding: 0 20px;
             z-index: 20;
             display: flex;
             justify-content: center;
@@ -99,43 +100,48 @@
         }
 
         .subtitles {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.9);
-            font-family: 'Arial', 'Helvetica', sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-            padding: 20px 25px;
-            max-width: 90%;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 18px; /* Оптимально для iPhone 14 */
+            line-height: 1.5;
+            padding: 16px 22px;
+            max-width: 100%;
+            width: auto;
+            min-width: 280px;
             text-align: center;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            border-radius: 4px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            word-break: break-word;
+            transition: opacity 0.2s ease;
+            word-break: keep-all;
+            white-space: pre-wrap;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
         .subtitles.visible {
             opacity: 1;
         }
 
-        /* Эффект печатной машинки для субтитров */
-        .subtitles.typing {
-            animation: typePulse 2s infinite;
+        /* Анимация появления */
+        .subtitles.fade-in {
+            animation: subtitleFade 0.3s ease;
         }
 
-        @keyframes typePulse {
-            0%, 100% { border-color: rgba(255, 255, 255, 0.15); }
-            50% { border-color: rgba(255, 255, 255, 0.4); }
+        @keyframes subtitleFade {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* Нижняя область для кнопки */
         .bottom-area {
             position: absolute;
-            bottom: 80px;
+            bottom: 70px;
             left: 0;
             width: 100%;
             display: flex;
@@ -149,26 +155,21 @@
             background: rgba(255, 255, 255, 0.18);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            font-family: 'Arial', 'Helvetica', sans-serif;
-            font-size: 24px;
+            font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 22px;
             font-weight: 400;
             letter-spacing: 2px;
             padding: 12px 40px;
             cursor: pointer;
             pointer-events: auto;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             transition: all 0.2s ease;
             text-transform: lowercase;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-            min-width: 200px;
+            min-width: 180px;
             text-align: center;
-        }
-
-        .action-button:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            border-radius: 0;
         }
 
         .action-button:active {
@@ -180,47 +181,28 @@
             background: rgba(255, 255, 255, 0.22);
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-            animation: breathe 2s infinite;
         }
 
-        @keyframes breathe {
-            0%, 100% { opacity: 0.9; }
-            50% { opacity: 1; }
-        }
-
-        /* Индикатор состояния */
-        .state-indicator {
+        /* Индикатор времени субтитров (очень тонкий) */
+        .subtitle-timer {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            color: rgba(255, 255, 255, 0.15);
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.25);
             font-size: 11px;
-            font-family: 'Arial', monospace;
+            font-family: monospace;
             letter-spacing: 1px;
-            z-index: 5;
+            z-index: 22;
         }
 
-        /* Прогресс-бар для субтитров (очень тонкий) */
-        .subtitle-progress {
-            position: absolute;
-            bottom: 160px;
-            left: 10%;
-            width: 80%;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 21;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: rgba(255, 255, 255, 0.3);
-            transition: width 0.1s linear;
-        }
-
-        @media (max-width: 400px) {
+        @media (max-width: 390px) {
+            .subtitles {
+                font-size: 16px;
+                padding: 14px 18px;
+                min-width: 240px;
+            }
+            
             .action-button {
                 font-size: 20px;
                 padding: 10px 30px;
@@ -232,12 +214,7 @@
             }
             
             .subtitles-container {
-                bottom: 150px;
-            }
-            
-            .subtitles {
-                font-size: 14px;
-                padding: 15px 20px;
+                bottom: 160px;
             }
         }
     </style>
@@ -252,18 +229,13 @@
         <!-- Виньетка -->
         <div class="vignette"></div>
         
-        <!-- Индикатор -->
-        <div class="state-indicator" id="stateIndicator">[ standby ]</div>
-        
-        <!-- Субтитры -->
+        <!-- Динамические субтитры -->
         <div class="subtitles-container">
             <div class="subtitles" id="subtitles"></div>
         </div>
         
-        <!-- Прогресс субтитров -->
-        <div class="subtitle-progress" id="subtitleProgress">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
+        <!-- Таймер (почти невидимый) -->
+        <div class="subtitle-timer" id="subtitleTimer"></div>
         
         <!-- Кнопка -->
         <div class="bottom-area">
@@ -274,123 +246,137 @@
     </div>
 
     <script>
-        class OutlastWithSubtitles {
+        class DynamicSubtitles {
             constructor() {
                 // Элементы
                 this.image = document.getElementById('characterImage');
                 this.button = document.getElementById('actionButton');
-                this.indicator = document.getElementById('stateIndicator');
                 this.subtitles = document.getElementById('subtitles');
-                this.progressFill = document.getElementById('progressFill');
+                this.timer = document.getElementById('subtitleTimer');
                 
                 // Аудио файлы
                 this.audioFiles = {
-                    hello: 'voice1.mp3',   // первая запись (короткая)
-                    thanks: 'voice2.mp3'    // вторая запись (50 секунд с текстом)
+                    hello: 'voice1.mp3',
+                    thanks: 'voice2.mp3'
                 };
                 
-                // Текст для субтитров (второй записи)
-                this.subtitleText = "Соединение прервано. Мне жаль, что я прерываю вас, Элизабет, если вы еще помните это имя, но боюсь, вас дезинформировали. Вы здесь не для того, чтобы получить подарок, и вас не позвал сюда человек, которого вы предполагаете, хотя вас действительно позвали. Вы все были вызваны сюда, в лабиринт звуков и запахов, дезинформации и несчастий. Лабиринт без выхода, лабиринт без приза. Вы даже не понимаете, что попали в ловушку. Ваша жажда крови загнала вас в бесконечные круги, преследуя крики детей в какой-то невидимой комнате, всегда кажущейся такой близкой, но почему-то недостижимой, но вы никогда их не найдете. Никто из вас не найдет. Здесь ваша история заканчивается.";
+                // Разбивка текста на динамические субтитры (оптимизировано для iPhone 14)
+                this.subtitleParts = [
+                    { text: "Соединение прервано.", start: 0, end: 2.5 },
+                    { text: "Мне жаль, что я прерываю вас, Элизабет,", start: 2.5, end: 5.5 },
+                    { text: "если вы еще помните это имя,", start: 5.5, end: 8 },
+                    { text: "но боюсь, вас дезинформировали.", start: 8, end: 10.5 },
+                    { text: "Вы здесь не для того,", start: 10.5, end: 12.5 },
+                    { text: "чтобы получить подарок,", start: 12.5, end: 14.5 },
+                    { text: "и вас не позвал сюда человек,", start: 14.5, end: 17 },
+                    { text: "которого вы предполагаете,", start: 17, end: 19 },
+                    { text: "хотя вас действительно позвали.", start: 19, end: 21.5 },
+                    { text: "Вы все были вызваны сюда,", start: 21.5, end: 24 },
+                    { text: "в лабиринт звуков и запахов,", start: 24, end: 26.5 },
+                    { text: "дезинформации и несчастий.", start: 26.5, end: 29 },
+                    { text: "Лабиринт без выхода,", start: 29, end: 31 },
+                    { text: "лабиринт без приза.", start: 31, end: 33 },
+                    { text: "Вы даже не понимаете,", start: 33, end: 35 },
+                    { text: "что попали в ловушку.", start: 35, end: 37 },
+                    { text: "Ваша жажда крови", start: 37, end: 39 },
+                    { text: "загнала вас в бесконечные круги,", start: 39, end: 42 },
+                    { text: "преследуя крики детей", start: 42, end: 44 },
+                    { text: "в какой-то невидимой комнате,", start: 44, end: 46.5 },
+                    { text: "всегда кажущейся такой близкой,", start: 46.5, end: 49 },
+                    { text: "но почему-то недостижимой,", start: 49, end: 51.5 },
+                    { text: "но вы никогда их не найдете.", start: 51.5, end: 54.5 },
+                    { text: "Никто из вас не найдет.", start: 54.5, end: 57 },
+                    { text: "Здесь ваша история заканчивается.", start: 57, end: 60 }
+                ];
                 
-                // Длительность второй записи в секундах
-                this.secondTrackDuration = 50; // 50 секунд
-                
-                this.currentState = 'hello'; // 'hello' или 'thanks'
+                this.currentState = 'hello';
                 this.isPlaying = false;
                 this.audio = new Audio();
                 this.animationInterval = null;
-                this.progressInterval = null;
+                this.subtitleInterval = null;
+                this.currentSubtitleIndex = -1;
                 
                 this.init();
             }
             
             init() {
-                // Обработчик кнопки
                 this.button.addEventListener('click', () => this.onButtonClick());
                 
-                // События аудио
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 
-                // Для мобильных устройств
-                document.addEventListener('touchstart', () => {
-                    // Активация аудио на iOS
-                }, { once: true });
+                document.addEventListener('touchstart', () => {}, { once: true });
             }
             
             onButtonClick() {
-                // Если играет, не даем нажать снова
                 if (this.isPlaying) return;
-                
-                // Проигрываем текущее состояние
                 this.startPlayback();
             }
             
             startPlayback() {
                 this.isPlaying = true;
-                
-                // Меняем индикатор
-                this.indicator.textContent = '[ playing ]';
-                
-                // Добавляем класс анимации к кнопке
                 this.button.classList.add('playing');
                 
-                // Запускаем анимацию рта (0.5 секунды между кадрами)
+                // Запускаем анимацию рта
                 this.startMouthAnimation();
                 
-                // Показываем субтитры для второй записи
+                // Если это вторая запись - запускаем динамические субтитры
                 if (this.currentState === 'thanks') {
-                    this.showSubtitles();
+                    this.startDynamicSubtitles();
                 }
                 
                 // Запускаем аудио
                 const audioFile = this.audioFiles[this.currentState];
                 this.audio.src = audioFile;
                 this.audio.play().catch(e => {
-                    console.log('Ошибка воспроизведения:', e);
+                    console.log('Ошибка:', e);
                     this.stopPlayback();
-                    this.indicator.textContent = '[ error ]';
                 });
             }
             
-            showSubtitles() {
-                // Показываем текст субтитров
-                this.subtitles.textContent = this.subtitleText;
+            startDynamicSubtitles() {
                 this.subtitles.classList.add('visible');
-                this.subtitles.classList.add('typing');
+                this.currentSubtitleIndex = -1;
                 
-                // Сбрасываем прогресс
-                this.progressFill.style.width = '0%';
-                
-                // Запускаем обновление прогресса
-                let startTime = Date.now();
-                this.progressInterval = setInterval(() => {
-                    if (!this.isPlaying) {
-                        clearInterval(this.progressInterval);
-                        return;
+                // Обновляем субтитры каждые 100мс для точности
+                this.subtitleInterval = setInterval(() => {
+                    if (!this.isPlaying || !this.audio) return;
+                    
+                    const currentTime = this.audio.currentTime;
+                    
+                    // Ищем подходящий субтитр
+                    let foundIndex = -1;
+                    for (let i = 0; i < this.subtitleParts.length; i++) {
+                        if (currentTime >= this.subtitleParts[i].start && 
+                            currentTime < this.subtitleParts[i].end) {
+                            foundIndex = i;
+                            break;
+                        }
                     }
                     
-                    const elapsed = (Date.now() - startTime) / 1000; // секунд прошло
-                    const progress = Math.min((elapsed / this.secondTrackDuration) * 100, 100);
-                    this.progressFill.style.width = progress + '%';
-                    
-                    // Если прошло больше длительности, останавливаем
-                    if (elapsed >= this.secondTrackDuration) {
-                        clearInterval(this.progressInterval);
+                    // Если нашли новый субтитр
+                    if (foundIndex !== -1 && foundIndex !== this.currentSubtitleIndex) {
+                        this.currentSubtitleIndex = foundIndex;
+                        this.subtitles.textContent = this.subtitleParts[foundIndex].text;
+                        this.subtitles.classList.add('fade-in');
+                        
+                        // Убираем класс анимации после завершения
+                        setTimeout(() => {
+                            this.subtitles.classList.remove('fade-in');
+                        }, 300);
+                        
+                        // Обновляем таймер (опционально)
+                        const totalParts = this.subtitleParts.length;
+                        this.timer.textContent = `${foundIndex + 1}/${totalParts}`;
                     }
-                }, 100);
-            }
-            
-            hideSubtitles() {
-                this.subtitles.classList.remove('visible');
-                this.subtitles.classList.remove('typing');
-                this.subtitles.textContent = '';
-                this.progressFill.style.width = '0%';
-                if (this.progressInterval) {
-                    clearInterval(this.progressInterval);
-                    this.progressInterval = null;
-                }
+                    
+                    // Если время вышло за последний субтитр
+                    if (currentTime > this.subtitleParts[this.subtitleParts.length - 1].end) {
+                        this.subtitles.textContent = this.subtitleParts[this.subtitleParts.length - 1].text;
+                    }
+                    
+                }, 100); // Проверяем каждые 100мс
             }
             
             startMouthAnimation() {
@@ -399,18 +385,16 @@
                 this.animationInterval = setInterval(() => {
                     if (!this.isPlaying) return;
                     
-                    // Меняем состояние рта каждые 0.5 секунд
                     isOpen = !isOpen;
                     this.image.src = isOpen ? 'mouth-open.png' : 'mouth-closed.png';
                     
-                    // Добавляем микро-эффект при смене
                     if (isOpen) {
                         this.image.style.filter = 'contrast(1.1) brightness(1)';
                     } else {
                         this.image.style.filter = 'contrast(1.05) brightness(0.95)';
                     }
                     
-                }, 500); // 0.5 секунды
+                }, 200);
             }
             
             stopMouthAnimation() {
@@ -422,52 +406,45 @@
                 this.image.style.filter = 'contrast(1.05) brightness(0.95)';
             }
             
-            onTimeUpdate() {
-                // Можно использовать для синхронизации, если нужно
-                if (this.currentState === 'thanks' && this.audio.duration) {
-                    const progress = (this.audio.currentTime / this.audio.duration) * 100;
-                    // Дополнительная синхронизация если нужно
+            stopDynamicSubtitles() {
+                if (this.subtitleInterval) {
+                    clearInterval(this.subtitleInterval);
+                    this.subtitleInterval = null;
                 }
+                this.subtitles.classList.remove('visible');
+                this.subtitles.textContent = '';
+                this.timer.textContent = '';
+                this.currentSubtitleIndex = -1;
+            }
+            
+            onTimeUpdate() {
+                // Дополнительная синхронизация если нужно
             }
             
             onEnded() {
-                console.log('Playback ended, state:', this.currentState);
-                
-                // Останавливаем анимацию
                 this.stopMouthAnimation();
-                
-                // Прячем субтитры
-                this.hideSubtitles();
+                this.stopDynamicSubtitles();
                 
                 // Меняем состояние
                 if (this.currentState === 'hello') {
-                    // После hello переключаем на thanks
                     this.currentState = 'thanks';
                     this.button.textContent = 'thanks';
-                    this.indicator.textContent = '[ ready ]';
                 } else {
-                    // После thanks возвращаем на hello
                     this.currentState = 'hello';
                     this.button.textContent = 'hello';
-                    this.indicator.textContent = '[ standby ]';
                 }
                 
-                // Убираем класс анимации
                 this.button.classList.remove('playing');
                 this.isPlaying = false;
             }
             
             onError(e) {
-                console.error('Ошибка аудио:', e);
+                console.error('Ошибка:', e);
                 this.stopMouthAnimation();
-                this.hideSubtitles();
+                this.stopDynamicSubtitles();
                 this.button.classList.remove('playing');
-                this.indicator.textContent = '[ file error ]';
                 this.isPlaying = false;
-                
-                // Проверка на наличие файлов
-                const fileName = this.audioFiles[this.currentState];
-                alert(`Файл ${fileName} не найден. Проверьте название файла!`);
+                alert(`Файл ${this.audioFiles[this.currentState]} не найден!`);
             }
             
             stopPlayback() {
@@ -476,15 +453,14 @@
                     this.audio.currentTime = 0;
                 }
                 this.stopMouthAnimation();
-                this.hideSubtitles();
+                this.stopDynamicSubtitles();
                 this.button.classList.remove('playing');
                 this.isPlaying = false;
             }
         }
 
-        // Запуск
         document.addEventListener('DOMContentLoaded', () => {
-            new OutlastWithSubtitles();
+            new DynamicSubtitles();
         });
     </script>
 </body>
