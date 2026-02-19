@@ -35,7 +35,6 @@
             margin: 0 auto;
         }
 
-        /* Страница 1 - Хоррор */
         .page {
             position: absolute;
             top: 0;
@@ -55,9 +54,8 @@
             pointer-events: none;
         }
 
-        /* Страница 2 - Аниме с 3D */
         #page2 {
-            background: white;
+            background: linear-gradient(145deg, #fff0f5 0%, #ffe4ec 50%, #ffd9e6 100%);
             opacity: 0;
             z-index: 1;
             pointer-events: none;
@@ -80,7 +78,6 @@
             z-index: 999;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.1s ease;
         }
 
         .crt-effect.active {
@@ -101,7 +98,7 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* ======= СТРАНИЦА 1 (ХОРРОР) ======= */
+        /* СТРАНИЦА 1: ХОРРОР */
         .fullscreen-image {
             width: 100%;
             height: 100%;
@@ -192,13 +189,13 @@
             border: 1px solid rgba(255, 255, 200, 0.4);
         }
 
-        /* ======= СТРАНИЦА 2 (3D АНИМЕ) ======= */
-        .anime-page {
-            background: white;
+        /* СТРАНИЦА 2: ДЕВИЧНИК В ПАСТЕЛЬНЫХ ТОНАХ */
+        .party-page {
             width: 100%;
             height: 100%;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(145deg, #fff0f5 0%, #ffe4ec 50%, #ffd9e6 100%);
         }
 
         /* Контейнер для Three.js */
@@ -208,47 +205,94 @@
             position: absolute;
             top: 0;
             left: 0;
+            z-index: 5;
         }
 
-        /* Кнопка возврата */
-        .return-button {
+        /* Украшения (звездочки, сердечки, шарики) */
+        .decoration {
             position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            color: #666;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            padding: 10px 25px;
-            cursor: pointer;
-            z-index: 100;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 10;
+            color: rgba(255, 200, 220, 0.7);
+            font-size: 24px;
+            animation: floatDecoration 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px rgba(255, 150, 200, 0.5));
         }
 
-        .return-button:hover {
-            background: rgba(0, 0, 0, 0.2);
-            color: #333;
+        @keyframes floatDecoration {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(10px, -15px) rotate(10deg); }
+            66% { transform: translate(-10px, -5px) rotate(-5deg); }
         }
 
-        /* Загрузчик */
+        /* Разные позиции для украшений */
+        .star1 { top: 10%; left: 5%; animation-delay: 0s; font-size: 28px; }
+        .star2 { top: 20%; right: 8%; animation-delay: 1s; font-size: 22px; }
+        .star3 { bottom: 25%; left: 12%; animation-delay: 2s; font-size: 32px; }
+        .heart1 { top: 15%; right: 15%; animation-delay: 1.5s; font-size: 30px; color: #ffb6c1; }
+        .heart2 { bottom: 30%; right: 20%; animation-delay: 0.5s; font-size: 26px; color: #ffb6c1; }
+        .heart3 { top: 40%; left: 8%; animation-delay: 2.5s; font-size: 24px; color: #ffb6c1; }
+        .balloon1 { top: 30%; right: 10%; animation-delay: 1s; font-size: 35px; }
+        .balloon2 { bottom: 15%; left: 15%; animation-delay: 2s; font-size: 30px; }
+        .balloon3 { top: 60%; right: 15%; animation-delay: 0.3s; font-size: 28px; }
+        .sparkle1 { bottom: 40%; left: 20%; animation-delay: 1.2s; font-size: 20px; }
+        .sparkle2 { top: 70%; right: 5%; animation-delay: 2.2s; font-size: 18px; }
+
+        /* Поздравление */
+        .birthday-message {
+            position: absolute;
+            top: 15%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 15;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+            color: #ff8da1;
+            text-shadow: 2px 2px 0 #ffffff, 4px 4px 0 rgba(255, 150, 200, 0.3);
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            animation: messageGlow 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes messageGlow {
+            0%, 100% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); text-shadow: 3px 3px 0 #ffffff, 6px 6px 0 rgba(255, 150, 200, 0.5); }
+        }
+
+        .sub-message {
+            position: absolute;
+            top: 23%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 15;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+            color: #ffa5b9;
+            font-size: 18px;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
         .loader {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #999;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            z-index: 10;
+            color: #ff8da1;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 16px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
 <body>
-    <!-- Эффекты перехода -->
+    <!-- Эффект перехода -->
     <div class="crt-effect" id="crtEffect"></div>
 
     <div class="game-container">
@@ -270,22 +314,35 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА 2: 3D АНИМЕ -->
+        <!-- СТРАНИЦА 2: ДЕВИЧНИК (без кнопки возврата) -->
         <div class="page" id="page2">
-            <div class="anime-page">
-                <!-- Контейнер для Three.js -->
+            <div class="party-page">
+                <!-- Контейнер для 3D головы -->
                 <div id="canvas-container"></div>
-                <div class="loader" id="modelLoader">Загрузка 3D модели...</div>
                 
-                <!-- Кнопка возврата -->
-                <button class="return-button" id="returnButton" onclick="location.reload()">
-                    ↩ вернуться
-                </button>
+                <!-- Украшения -->
+                <div class="decoration star1">✨</div>
+                <div class="decoration star2">⭐</div>
+                <div class="decoration star3">🌟</div>
+                <div class="decoration heart1">❤️</div>
+                <div class="decoration heart2">💖</div>
+                <div class="decoration heart3">💗</div>
+                <div class="decoration balloon1">🎈</div>
+                <div class="decoration balloon2">🎈</div>
+                <div class="decoration balloon3">🎈</div>
+                <div class="decoration sparkle1">💫</div>
+                <div class="decoration sparkle2">✨</div>
+                
+                <!-- Поздравление -->
+                <div class="birthday-message">С Днём Рождения, Мелина! 🎀</div>
+                <div class="sub-message">тебя ждет сюрприз ✨</div>
+                
+                <div class="loader" id="modelLoader">✨ загружаем сюрприз ✨</div>
             </div>
         </div>
     </div>
 
-    <!-- Подключаем Three.js и загрузчик GLTF -->
+    <!-- Подключаем Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -298,10 +355,8 @@
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // ========== ОСНОВНОЙ КЛАСС ==========
-        class HorrorTo3DAnime {
+        class BirthdayParty {
             constructor() {
                 // Элементы
                 this.image = document.getElementById('characterImage');
@@ -318,7 +373,12 @@
                     thanks: 'voice2.mp3'
                 };
                 
-                // Субтитры
+                // Фоновая музыка для второй страницы
+                this.bgMusic = new Audio('birthday-music.mp3');
+                this.bgMusic.loop = true;
+                this.bgMusic.volume = 0.5;
+                
+                // Субтитры с Мелиной
                 this.subtitleParts = [
                     { text: "Соединение прервано.", start: 0, end: 2.5 },
                     { text: "Мне жаль, что я прерываю вас, Мелина,", start: 2.5, end: 5.5 },
@@ -448,17 +508,17 @@
                 this.currentSubtitleIndex = -1;
             }
             
-            // ========== 3D АНИМАЦИЯ ==========
+            // 3D анимация в пастельных тонах
             init3D() {
                 const container = document.getElementById('canvas-container');
                 
-                // Сцена
+                // Сцена с пастельным фоном
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0xffffff);
+                this.scene.background = new THREE.Color(0xfff0f5);
                 
-                // Камера
+                // Камера - увеличиваем расстояние в 3 раза (было 5, стало 15)
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-                this.camera.position.set(0, 0, 5);
+                this.camera.position.set(0, 0, 15); // Дальше в 3 раза
                 
                 // Рендерер
                 this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -466,35 +526,77 @@
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 container.appendChild(this.renderer.domElement);
                 
-                // Свет
-                const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                // Мягкое освещение для пастельных тонов
+                const ambientLight = new THREE.AmbientLight(0xffccdd, 1.2);
                 this.scene.add(ambientLight);
                 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                directionalLight.position.set(1, 2, 3);
-                this.scene.add(directionalLight);
+                const pinkLight = new THREE.PointLight(0xffa5b9, 1);
+                pinkLight.position.set(3, 3, 6); // Смещаем свет дальше
+                this.scene.add(pinkLight);
                 
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                backLight.position.set(-1, -1, -2);
+                const backLight = new THREE.PointLight(0xffc0cb, 0.8);
+                backLight.position.set(-3, -1.5, -6); // Смещаем свет дальше
                 this.scene.add(backLight);
+                
+                // Добавляем пастельные частицы (звездочки)
+                const starsGeometry = new THREE.BufferGeometry();
+                const starsCount = 300; // Больше звездочек
+                const starsPositions = new Float32Array(starsCount * 3);
+                for (let i = 0; i < starsCount * 3; i += 3) {
+                    starsPositions[i] = (Math.random() - 0.5) * 30; // Шире разброс
+                    starsPositions[i+1] = (Math.random() - 0.5) * 30;
+                    starsPositions[i+2] = (Math.random() - 0.5) * 15 - 5;
+                }
+                starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+                
+                const starsMaterial = new THREE.PointsMaterial({ 
+                    color: 0xffa5b9, 
+                    size: 0.1,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const stars = new THREE.Points(starsGeometry, starsMaterial);
+                this.scene.add(stars);
                 
                 // Загрузка модели
                 const loader = new GLTFLoader();
                 
                 loader.load(
-                    'anime-head.glb', // Имя твоего файла
+                    'anime-head.glb',
                     (gltf) => {
                         this.model = gltf.scene;
                         
-                        // Центрируем модель
+                        // Применяем пастельные тона к модели
+                        this.model.traverse((node) => {
+                            if (node.isMesh) {
+                                if (node.material) {
+                                    if (Array.isArray(node.material)) {
+                                        node.material.forEach(mat => {
+                                            if (mat.color) {
+                                                const color = mat.color;
+                                                color.multiplyScalar(1.2);
+                                                color.lerp(new THREE.Color(0xffc0cb), 0.3);
+                                            }
+                                        });
+                                    } else {
+                                        if (node.material.color) {
+                                            const color = node.material.color;
+                                            color.multiplyScalar(1.2);
+                                            color.lerp(new THREE.Color(0xffc0cb), 0.3);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // Центрируем и масштабируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
                         
-                        // Масштабируем под размер экрана
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2.5 / maxDim; // Подгоняем размер
+                        const scale = 2.2 / maxDim; // Оставляем масштаб как был
                         this.model.scale.set(scale, scale, scale);
                         
                         this.scene.add(this.model);
@@ -503,58 +605,80 @@
                             this.loader.style.display = 'none';
                         }
                         
-                        console.log('3D модель загружена!');
+                        // Запускаем фоновую музыку
+                        this.bgMusic.play().catch(e => console.log('Музыка ждет взаимодействия'));
                     },
                     (xhr) => {
-                        // Прогресс загрузки
                         const percent = Math.floor((xhr.loaded / xhr.total) * 100);
                         if (this.loader) {
-                            this.loader.textContent = `Загрузка... ${percent}%`;
+                            this.loader.textContent = `✨ грузим сюрприз ${percent}% ✨`;
                         }
                     },
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
-                        if (this.loader) {
-                            this.loader.textContent = 'Ошибка загрузки модели';
-                        }
-                        
-                        // Создаем заглушку если модель не загрузилась
                         this.createPlaceholderHead();
                     }
                 );
                 
-                // Запускаем анимацию
                 this.animate();
                 
-                // Обработка ресайза
                 window.addEventListener('resize', () => this.onWindowResize());
             }
             
-            // Заглушка на случай отсутствия модели
             createPlaceholderHead() {
+                // Милая пастельная голова-заглушка
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
-                const material = new THREE.MeshStandardMaterial({ color: 0xff99cc });
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: 0xffb6c1,
+                    emissive: 0x331111,
+                    roughness: 0.3,
+                    metalness: 0.1
+                });
                 const sphere = new THREE.Mesh(geometry, material);
                 
                 // Глазки
                 const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
-                const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+                const eyeMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
                 
                 const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye1.position.set(-0.4, 0.3, 0.8);
+                eye1.position.set(-0.4, 0.3, 0.85);
                 sphere.add(eye1);
                 
                 const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye2.position.set(0.4, 0.3, 0.8);
+                eye2.position.set(0.4, 0.3, 0.85);
                 sphere.add(eye2);
                 
+                // Блики в глазах
+                const sparkleGeo = new THREE.SphereGeometry(0.05, 8, 8);
+                const sparkleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+                
+                const sparkle1 = new THREE.Mesh(sparkleGeo, sparkleMat);
+                sparkle1.position.set(-0.35, 0.35, 0.95);
+                sphere.add(sparkle1);
+                
+                const sparkle2 = new THREE.Mesh(sparkleGeo, sparkleMat);
+                sparkle2.position.set(0.45, 0.35, 0.95);
+                sphere.add(sparkle2);
+                
+                // Румянец
+                const blushGeo = new THREE.SphereGeometry(0.15, 8, 8);
+                const blushMat = new THREE.MeshStandardMaterial({ color: 0xffa5b9 });
+                
+                const blush1 = new THREE.Mesh(blushGeo, blushMat);
+                blush1.position.set(-0.7, 0.1, 0.7);
+                sphere.add(blush1);
+                
+                const blush2 = new THREE.Mesh(blushGeo, blushMat);
+                blush2.position.set(0.7, 0.1, 0.7);
+                sphere.add(blush2);
+                
                 // Ротик
-                const mouthGeo = new THREE.TorusGeometry(0.3, 0.05, 16, 32, Math.PI);
-                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff6666 });
+                const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
+                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff6b8a });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
                 mouth.rotation.x = Math.PI / 2;
                 mouth.rotation.z = Math.PI;
-                mouth.position.set(0, -0.2, 0.8);
+                mouth.position.set(0, -0.2, 0.85);
                 sphere.add(mouth);
                 
                 this.model = sphere;
@@ -569,16 +693,14 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model) {
-                    // Вращение вокруг своей оси (как в Майнкрафте)
-                    this.model.rotation.y += 0.005;
+                    // Медленное вращение
+                    this.model.rotation.y += 0.003;
                     
-                    // Плавное движение вверх-вниз
+                    // Плавное покачивание
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = Math.sin(time * 1.5) * 0.2;
-                    
-                    // Легкое покачивание
-                    this.model.rotation.z = Math.sin(time * 0.8) * 0.05;
-                    this.model.rotation.x = Math.sin(time * 0.5) * 0.05;
+                    this.model.position.y = Math.sin(time * 1.2) * 0.15;
+                    this.model.rotation.x = Math.sin(time * 0.4) * 0.03;
+                    this.model.rotation.z = Math.sin(time * 0.6) * 0.03;
                 }
                 
                 this.renderer.render(this.scene, this.camera);
@@ -593,7 +715,6 @@
                 }
             }
             
-            // ========== ПЕРЕХОД ==========
             playTransition() {
                 this.crtEffect.classList.add('active');
                 
@@ -601,7 +722,6 @@
                     this.page1.classList.add('hidden');
                     this.page2.classList.add('visible');
                     
-                    // Инициализируем 3D после появления страницы
                     setTimeout(() => {
                         this.init3D();
                     }, 100);
@@ -653,9 +773,8 @@
             }
         }
 
-        // Запуск
         document.addEventListener('DOMContentLoaded', () => {
-            new HorrorTo3DAnime();
+            new BirthdayParty();
         });
     </script>
 </body>
