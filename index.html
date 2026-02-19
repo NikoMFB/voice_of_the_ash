@@ -98,10 +98,10 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик */
+        /* Крестик - опущен на 20% ниже */
         .skip-cross {
             position: absolute;
-            top: 20px;
+            top: 60px; /* Было 20px, стало 60px (подняли? или опустили? если надо ниже - увеличиваем) */
             right: 20px;
             width: 48px;
             height: 48px;
@@ -150,9 +150,11 @@
             display: block;
             filter: contrast(1.1) brightness(0.95) saturate(1.2);
             animation: vhsFlicker 0.15s infinite;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Анимированные полосы помех */
+        /* Анимированные полосы помех - теперь pointer-events: none */
         .vhs-noise {
             position: absolute;
             top: 0;
@@ -174,7 +176,7 @@
             mix-blend-mode: overlay;
         }
 
-        /* Цветовая аберрация (смещение каналов) */
+        /* Цветовая аберрация */
         .vhs-chromatic {
             position: absolute;
             top: 0;
@@ -190,7 +192,7 @@
             mix-blend-mode: screen;
         }
 
-        /* Случайные помехи (глитчи) */
+        /* Случайные помехи */
         .vhs-glitch {
             position: absolute;
             top: 0;
@@ -312,7 +314,7 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            z-index: 10;
+            z-index: 30; /* Увеличил z-index */
             pointer-events: none;
         }
 
@@ -331,6 +333,8 @@
             text-transform: lowercase;
             min-width: 180px;
             text-align: center;
+            position: relative;
+            z-index: 31;
         }
 
         .action-button.playing {
@@ -345,7 +349,7 @@
             position: relative;
             overflow: hidden;
             background: linear-gradient(145deg, #fff0f5 0%, #ffe4ec 50%, #ffd9e6 100%);
-            cursor: pointer; /* Показываем что можно кликать */
+            cursor: pointer;
         }
 
         /* Контейнер для Three.js */
@@ -456,14 +460,14 @@
     <div class="game-container">
         <!-- СТРАНИЦА 1: ХОРРОР С VHS ЭФФЕКТОМ -->
         <div class="page" id="page1">
-            <!-- Крестик -->
+            <!-- Крестик - опущен на 20% (теперь top: 60px) -->
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="vhs-container">
                 <!-- Основное изображение -->
                 <img src="mouth-closed.png" alt="" id="characterImage">
                 
-                <!-- VHS эффекты -->
+                <!-- VHS эффекты - все с pointer-events: none -->
                 <div class="vhs-noise"></div>
                 <div class="vhs-chromatic"></div>
                 <div class="vhs-glitch"></div>
@@ -703,10 +707,8 @@
                 const startScale = this.model.scale.x;
                 
                 // Анимация: увеличиваем на 10% (1.1), потом уменьшаем на 15% от увеличенного (0.935), потом возвращаем
-                // 1.1 -> 0.935 -> 1.0
-                
                 let progress = 0;
-                const duration = 600; // 0.6 секунды на всю анимацию
+                const duration = 600; // 0.6 секунды
                 const startTime = performance.now();
                 
                 const animate = (currentTime) => {
@@ -715,18 +717,18 @@
                     
                     if (progress < 0.33) {
                         // Первая треть: увеличение до 1.1
-                        const t = progress * 3; // 0 -> 1
-                        const scale = 1.0 + (t * 0.1); // 1.0 -> 1.1
+                        const t = progress * 3;
+                        const scale = 1.0 + (t * 0.1);
                         this.model.scale.set(scale, scale, scale);
                     } else if (progress < 0.66) {
                         // Вторая треть: уменьшение до 0.935
-                        const t = (progress - 0.33) * 3; // 0 -> 1
-                        const scale = 1.1 - (t * 0.165); // 1.1 -> 0.935
+                        const t = (progress - 0.33) * 3;
+                        const scale = 1.1 - (t * 0.165);
                         this.model.scale.set(scale, scale, scale);
                     } else {
                         // Последняя треть: возврат к 1.0
-                        const t = (progress - 0.66) * 3; // 0 -> 1
-                        const scale = 0.935 + (t * 0.065); // 0.935 -> 1.0
+                        const t = (progress - 0.66) * 3;
+                        const scale = 0.935 + (t * 0.065);
                         this.model.scale.set(scale, scale, scale);
                     }
                     
@@ -851,4 +853,4 @@
                     (gltf) => {
                         this.model = gltf.scene;
                         
-                        // Применяем матовые
+                        // Применяем матов
