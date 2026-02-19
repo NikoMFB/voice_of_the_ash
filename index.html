@@ -67,7 +67,6 @@
             pointer-events: auto;
         }
 
-        /* Эффект выключения монитора */
         .crt-effect {
             position: fixed;
             top: 0;
@@ -98,7 +97,6 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик */
         .skip-cross {
             position: absolute;
             top: 60px;
@@ -121,7 +119,6 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        /* СТРАНИЦА 1 */
         .horror-container {
             position: relative;
             width: 100%;
@@ -216,7 +213,6 @@
             border: 1px solid rgba(255, 255, 200, 0.4);
         }
 
-        /* СТРАНИЦА 2 */
         .party-page {
             width: 100%;
             height: 100%;
@@ -327,7 +323,6 @@
     <div class="crt-effect" id="crtEffect"></div>
 
     <div class="game-container">
-        <!-- СТРАНИЦА 1 -->
         <div class="page" id="page1">
             <div class="skip-cross" id="skipButton">✕</div>
             
@@ -345,7 +340,6 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА 2 -->
         <div class="page" id="page2">
             <div class="party-page" id="partyPage">
                 <div id="canvas-container"></div>
@@ -384,7 +378,8 @@
 
         class BirthdayParty {
             constructor() {
-                // Элементы
+                console.log('Конструктор запущен');
+                
                 this.image = document.getElementById('characterImage');
                 this.button = document.getElementById('actionButton');
                 this.subtitles = document.getElementById('subtitles');
@@ -395,18 +390,17 @@
                 this.skipButton = document.getElementById('skipButton');
                 this.clickHint = document.getElementById('clickHint');
                 
-                // Аудио файлы
+                console.log('Кнопка найдена:', this.button ? 'да' : 'нет');
+                
                 this.audioFiles = {
                     hello: 'voice1.mp3',
                     thanks: 'voice2.mp3'
                 };
                 
-                // Фоновая музыка
                 this.bgMusic = new Audio('birthday-music.mp3');
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.4;
                 
-                // Субтитры
                 this.subtitleParts = [
                     { text: "Соединение прервано.", start: 0, end: 2.5 },
                     { text: "Мне жаль, что я прерываю вас, Мелина,", start: 2.5, end: 5.5 },
@@ -443,7 +437,6 @@
                 this.currentSubtitleIndex = -1;
                 this.hasSecondEnded = false;
                 
-                // 3D переменные
                 this.scene = null;
                 this.camera = null;
                 this.renderer = null;
@@ -452,12 +445,6 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
-                // Для плавной анимации
-                this.targetY = 0;
-                this.currentY = 0;
-                this.rotationSpeed = 0.0033;
-                
-                // Raycaster
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2();
                 
@@ -467,27 +454,26 @@
             init() {
                 console.log('Инициализация...');
                 
-                if (!this.button) {
-                    console.error('Кнопка не найдена!');
-                    return;
+                if (this.button) {
+                    this.button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Кнопка нажата!');
+                        this.onButtonClick();
+                    });
+                    console.log('Обработчик кнопки добавлен');
+                } else {
+                    console.error('Кнопка не найдена в init');
                 }
                 
-                if (!this.skipButton) {
-                    console.error('Крестик не найдена!');
-                    return;
+                if (this.skipButton) {
+                    this.skipButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Крестик нажат');
+                        this.skipToParty();
+                    });
                 }
-                
-                this.button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    console.log('Кнопка нажата');
-                    this.onButtonClick();
-                });
-                
-                this.skipButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    console.log('Крестик нажат');
-                    this.skipToParty();
-                });
                 
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
@@ -515,7 +501,7 @@
             startPlayback() {
                 console.log('Старт воспроизведения');
                 this.isPlaying = true;
-                this.button.classList.add('playing');
+                if (this.button) this.button.classList.add('playing');
                 
                 this.startMouthAnimation();
                 
@@ -531,12 +517,13 @@
                     .then(() => console.log('Аудио играет'))
                     .catch(e => {
                         console.error('Ошибка воспроизведения:', e);
-                        alert(`Файл ${audioFile} не найден! Проверьте название файла.`);
+                        alert(`Файл ${audioFile} не найден!`);
                         this.stopPlayback();
                     });
             }
             
             startSubtitles() {
+                if (!this.subtitles) return;
                 this.subtitles.classList.add('visible');
                 this.currentSubtitleIndex = -1;
                 
@@ -586,8 +573,10 @@
                     clearInterval(this.subtitleInterval);
                     this.subtitleInterval = null;
                 }
-                this.subtitles.classList.remove('visible');
-                this.subtitles.textContent = '';
+                if (this.subtitles) {
+                    this.subtitles.classList.remove('visible');
+                    this.subtitles.textContent = '';
+                }
                 this.currentSubtitleIndex = -1;
             }
             
@@ -643,7 +632,6 @@
                 const duration = 600;
                 const startTime = performance.now();
                 
-                // Сохраняем текущую позицию Y
                 const currentY = this.model.position.y;
                 
                 const animate = (currentTime) => {
@@ -651,29 +639,24 @@
                     progress = Math.min(elapsed / duration, 1);
                     
                     if (progress < 0.33) {
-                        // Увеличение до +10%
                         const t = progress * 3;
                         const scale = this.originalScale * (1 + t * 0.1);
                         this.model.scale.set(scale, scale, scale);
                     } else if (progress < 0.66) {
-                        // Уменьшение до -15% от увеличенного (0.935 от оригинала)
                         const t = (progress - 0.33) * 3;
                         const scale = this.originalScale * (1.1 - t * 0.165);
                         this.model.scale.set(scale, scale, scale);
                     } else {
-                        // Возврат к оригиналу
                         const t = (progress - 0.66) * 3;
                         const scale = this.originalScale * (0.935 + t * 0.065);
                         this.model.scale.set(scale, scale, scale);
                     }
                     
-                    // Возвращаем позицию Y (чтобы не дергалось)
                     this.model.position.y = currentY;
                     
                     if (progress < 1) {
                         requestAnimationFrame(animate);
                     } else {
-                        // Точно возвращаем оригинальный масштаб
                         this.model.scale.set(this.originalScale, this.originalScale, this.originalScale);
                         this.isAnimating = false;
                         
@@ -729,35 +712,23 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // НЕЙТРАЛЬНОЕ ОСВЕЩЕНИЕ (убираем розовый)
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Увеличил яркость
+                // Нейтральное освещение
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
                 this.scene.add(ambientLight);
                 
-                // Основной свет спереди
                 const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
                 frontLight.position.set(0, 1, 5);
                 this.scene.add(frontLight);
                 
-                // Свет сверху
-                const topLight = new THREE.DirectionalLight(0xffffff, 0.7);
+                const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
                 topLight.position.set(0, 5, 2);
                 this.scene.add(topLight);
                 
-                // Заполняющий свет сзади
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
                 backLight.position.set(0, 0, -5);
                 this.scene.add(backLight);
                 
-                // Боковые света (нейтральные)
-                const leftLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                leftLight.position.set(-3, 1, 3);
-                this.scene.add(leftLight);
-                
-                const rightLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                rightLight.position.set(3, 1, 3);
-                this.scene.add(rightLight);
-                
-                // Звездочки (оставляем чуть розоватыми для атмосферы)
+                // Звездочки
                 const starsGeometry = new THREE.BufferGeometry();
                 const starsCount = 300;
                 const starsPositions = new Float32Array(starsCount * 3);
@@ -769,7 +740,7 @@
                 starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
                 
                 const starsMaterial = new THREE.PointsMaterial({ 
-                    color: 0xffcccc, // Светло-розовый, почти белый
+                    color: 0xffdddd,
                     size: 0.12,
                     transparent: true,
                     opacity: 0.3
@@ -777,7 +748,6 @@
                 const stars = new THREE.Points(starsGeometry, starsMaterial);
                 this.scene.add(stars);
                 
-                // Загрузка модели
                 const loader = new GLTFLoader();
                 
                 loader.load(
@@ -786,21 +756,15 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // Центрируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
                         
-                        // Масштабируем
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         const scale = 2.2 / maxDim;
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
-                        
-                        // Сохраняем начальную позицию
-                        this.targetY = 0;
-                        this.currentY = 0;
                         
                         this.scene.add(this.model);
                         
@@ -832,13 +796,11 @@
                 
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
                 const material = new THREE.MeshStandardMaterial({ 
-                    color: 0xffdddd, // Светло-розовый, почти телесный
-                    roughness: 0.5,
-                    emissive: 0x000000
+                    color: 0xffdddd,
+                    roughness: 0.5
                 });
                 const sphere = new THREE.Mesh(geometry, material);
                 
-                // Глазки
                 const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
                 const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
                 
@@ -850,7 +812,6 @@
                 eye2.position.set(0.4, 0.3, 0.85);
                 sphere.add(eye2);
                 
-                // Ротик
                 const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
                 const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff8888 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -872,10 +833,8 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // Плавное вращение
-                    this.model.rotation.y += this.rotationSpeed;
+                    this.model.rotation.y += 0.0033;
                     
-                    // Плавное покачивание вверх-вниз (используем синус)
                     const time = this.clock.getElapsedTime();
                     this.model.position.y = Math.sin(time * 1.5) * 0.2;
                 }
@@ -916,4 +875,8 @@
         // Запуск после загрузки страницы
         window.addEventListener('load', () => {
             console.log('Страница загружена');
-            new BirthdayParty
+            new BirthdayParty();
+        });
+    </script>
+</body>
+</html>
