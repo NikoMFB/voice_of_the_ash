@@ -98,13 +98,13 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик - убрал кружок, просто крестик */
+        /* Крестик */
         .skip-cross {
             position: absolute;
             top: 60px;
             right: 25px;
-            color: rgba(255, 255, 255, 0.2); /* Прозрачность 20% */
-            font-family: 'Arial', 'Helvetica', sans-serif;
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Arial', sans-serif;
             font-size: 36px;
             font-weight: 300;
             cursor: pointer;
@@ -121,7 +121,7 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        /* СТРАНИЦА 1: ХОРРОР (без VHS) */
+        /* СТРАНИЦА 1 */
         .horror-container {
             position: relative;
             width: 100%;
@@ -216,7 +216,7 @@
             border: 1px solid rgba(255, 255, 200, 0.4);
         }
 
-        /* СТРАНИЦА 2: ДЕВИЧНИК */
+        /* СТРАНИЦА 2 */
         .party-page {
             width: 100%;
             height: 100%;
@@ -226,7 +226,6 @@
             cursor: pointer;
         }
 
-        /* Контейнер для Three.js */
         #canvas-container {
             width: 100%;
             height: 100%;
@@ -236,7 +235,6 @@
             z-index: 5;
         }
 
-        /* Украшения */
         .decoration {
             position: absolute;
             pointer-events: none;
@@ -265,7 +263,6 @@
         .sparkle1 { bottom: 40%; left: 20%; animation-delay: 1.2s; font-size: 20px; }
         .sparkle2 { top: 70%; right: 5%; animation-delay: 2.2s; font-size: 18px; }
 
-        /* Поздравление */
         .birthday-message {
             position: absolute;
             top: 25%;
@@ -303,7 +300,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Подсказка что можно кликнуть на голову */
         .click-hint {
             position: absolute;
             bottom: 20px;
@@ -328,13 +324,11 @@
     </style>
 </head>
 <body>
-    <!-- Эффект перехода -->
     <div class="crt-effect" id="crtEffect"></div>
 
     <div class="game-container">
-        <!-- СТРАНИЦА 1: ХОРРОР (БЕЗ VHS) -->
+        <!-- СТРАНИЦА 1 -->
         <div class="page" id="page1">
-            <!-- Крестик - просто символ, без фона -->
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="horror-container">
@@ -347,18 +341,15 @@
             </div>
             
             <div class="bottom-area">
-                <button class="action-button" id="actionButton">
-                    hello
-                </button>
+                <button class="action-button" id="actionButton">hello</button>
             </div>
         </div>
 
-        <!-- СТРАНИЦА 2: ДЕВИЧНИК С КЛИКАБЕЛЬНОЙ ГОЛОВОЙ -->
+        <!-- СТРАНИЦА 2 -->
         <div class="page" id="page2">
             <div class="party-page" id="partyPage">
                 <div id="canvas-container"></div>
                 
-                <!-- Украшения -->
                 <div class="decoration star1">✨</div>
                 <div class="decoration star2">⭐</div>
                 <div class="decoration star3">🌟</div>
@@ -372,16 +363,12 @@
                 <div class="decoration sparkle2">✨</div>
                 
                 <div class="birthday-message">С Днём Рождения, Мелина! 🎀</div>
-                
-                <!-- Подсказка для клика -->
                 <div class="click-hint" id="clickHint">👆 нажми на голову</div>
-                
                 <div class="loader" id="modelLoader">✨ загружаем ✨</div>
             </div>
         </div>
     </div>
 
-    <!-- Подключаем Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -406,7 +393,6 @@
                 this.crtEffect = document.getElementById('crtEffect');
                 this.loader = document.getElementById('modelLoader');
                 this.skipButton = document.getElementById('skipButton');
-                this.partyPage = document.getElementById('partyPage');
                 this.clickHint = document.getElementById('clickHint');
                 
                 // Аудио файлы
@@ -466,7 +452,7 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
-                // Raycaster для определения клика по 3D модели
+                // Raycaster
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2();
                 
@@ -476,25 +462,34 @@
             init() {
                 console.log('Инициализация...');
                 
-                // Проверяем что элементы существуют
-                if (this.button) {
-                    this.button.addEventListener('click', () => this.onButtonClick());
-                    console.log('Кнопка найдена');
-                } else {
+                // Проверяем наличие элементов
+                if (!this.button) {
                     console.error('Кнопка не найдена!');
+                    return;
                 }
                 
-                if (this.skipButton) {
-                    this.skipButton.addEventListener('click', () => this.skipToParty());
-                    console.log('Крестик найден');
-                } else {
-                    console.error('Крестик не найден!');
+                if (!this.skipButton) {
+                    console.error('Крестик не найдена!');
+                    return;
                 }
+                
+                // Добавляем обработчики
+                this.button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    console.log('Кнопка нажата');
+                    this.onButtonClick();
+                });
+                
+                this.skipButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    console.log('Крестик нажат');
+                    this.skipToParty();
+                });
                 
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 
-                document.addEventListener('touchstart', () => {}, { once: true });
+                console.log('Инициализация завершена');
             }
             
             skipToParty() {
@@ -506,13 +501,16 @@
             }
             
             onButtonClick() {
-                console.log('Кнопка нажата');
-                if (this.isPlaying) return;
+                console.log('Обработчик кнопки, состояние:', this.currentState);
+                if (this.isPlaying) {
+                    console.log('Уже играет');
+                    return;
+                }
                 this.startPlayback();
             }
             
             startPlayback() {
-                console.log('Старт воспроизведения, состояние:', this.currentState);
+                console.log('Старт воспроизведения');
                 this.isPlaying = true;
                 this.button.classList.add('playing');
                 
@@ -524,11 +522,15 @@
                 
                 const audioFile = this.audioFiles[this.currentState];
                 console.log('Загружаем аудио:', audioFile);
+                
                 this.audio.src = audioFile;
-                this.audio.play().catch(e => {
-                    console.log('Ошибка воспроизведения:', e);
-                    this.stopPlayback();
-                });
+                this.audio.play()
+                    .then(() => console.log('Аудио играет'))
+                    .catch(e => {
+                        console.error('Ошибка воспроизведения:', e);
+                        alert(`Файл ${audioFile} не найден! Проверьте название файла.`);
+                        this.stopPlayback();
+                    });
             }
             
             startSubtitles() {
@@ -560,7 +562,9 @@
                 this.animationInterval = setInterval(() => {
                     if (!this.isPlaying) return;
                     isOpen = !isOpen;
-                    this.image.src = isOpen ? 'mouth-open.png' : 'mouth-closed.png';
+                    if (this.image) {
+                        this.image.src = isOpen ? 'mouth-open.png' : 'mouth-closed.png';
+                    }
                 }, 200);
             }
             
@@ -569,7 +573,9 @@
                     clearInterval(this.animationInterval);
                     this.animationInterval = null;
                 }
-                this.image.src = 'mouth-closed.png';
+                if (this.image) {
+                    this.image.src = 'mouth-closed.png';
+                }
             }
             
             stopSubtitles() {
@@ -582,19 +588,56 @@
                 this.currentSubtitleIndex = -1;
             }
             
-            // Функция анимации нажатия на голову
+            onEnded() {
+                console.log('Воспроизведение закончено');
+                this.stopMouthAnimation();
+                this.stopSubtitles();
+                
+                if (this.currentState === 'hello') {
+                    this.currentState = 'thanks';
+                    if (this.button) this.button.textContent = 'thanks';
+                } else {
+                    if (!this.hasSecondEnded) {
+                        this.hasSecondEnded = true;
+                        this.playTransition();
+                    }
+                    this.currentState = 'hello';
+                    if (this.button) this.button.textContent = 'hello';
+                }
+                
+                if (this.button) this.button.classList.remove('playing');
+                this.isPlaying = false;
+            }
+            
+            onError(e) {
+                console.error('Ошибка аудио:', e);
+                this.stopMouthAnimation();
+                this.stopSubtitles();
+                if (this.button) this.button.classList.remove('playing');
+                this.isPlaying = false;
+            }
+            
+            stopPlayback() {
+                if (this.audio) {
+                    this.audio.pause();
+                    this.audio.currentTime = 0;
+                }
+                this.stopMouthAnimation();
+                this.stopSubtitles();
+                if (this.button) this.button.classList.remove('playing');
+                this.isPlaying = false;
+            }
+            
             animateHeadClick() {
                 if (this.isAnimating || !this.model) return;
                 
                 console.log('Клик по голове!');
                 this.isAnimating = true;
                 
-                // Запоминаем начальный масштаб
                 this.originalScale = this.model.scale.x;
                 
-                // Анимация: увеличиваем на 10% (1.1), потом уменьшаем на 15% от увеличенного (0.935), потом возвращаем
                 let progress = 0;
-                const duration = 600; // 0.6 секунды
+                const duration = 600;
                 const startTime = performance.now();
                 
                 const animate = (currentTime) => {
@@ -602,17 +645,14 @@
                     progress = Math.min(elapsed / duration, 1);
                     
                     if (progress < 0.33) {
-                        // Первая треть: увеличение до 1.1
                         const t = progress * 3;
                         const scale = this.originalScale + (t * this.originalScale * 0.1);
                         this.model.scale.set(scale, scale, scale);
                     } else if (progress < 0.66) {
-                        // Вторая треть: уменьшение до 0.935 от увеличенного
                         const t = (progress - 0.33) * 3;
                         const scale = this.originalScale * 1.1 - (t * this.originalScale * 0.165);
                         this.model.scale.set(scale, scale, scale);
                     } else {
-                        // Последняя треть: возврат к исходному
                         const t = (progress - 0.66) * 3;
                         const scale = this.originalScale * 0.935 + (t * this.originalScale * 0.065);
                         this.model.scale.set(scale, scale, scale);
@@ -621,11 +661,9 @@
                     if (progress < 1) {
                         requestAnimationFrame(animate);
                     } else {
-                        // Возвращаем точный масштаб
                         this.model.scale.set(this.originalScale, this.originalScale, this.originalScale);
                         this.isAnimating = false;
                         
-                        // Прячем подсказку после первого клика
                         if (this.clickHint) {
                             this.clickHint.style.opacity = '0';
                             setTimeout(() => {
@@ -638,30 +676,23 @@
                 requestAnimationFrame(animate);
             }
             
-            // Обработчик клика по 3D сцене
             onCanvasClick(event) {
                 if (!this.model || this.isAnimating) return;
                 
-                // Получаем координаты клика относительно canvas
                 const rect = this.renderer.domElement.getBoundingClientRect();
                 
-                // Нормализованные координаты для raycaster (-1 до 1)
                 this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
                 
-                // Обновляем raycaster
                 this.raycaster.setFromCamera(this.mouse, this.camera);
                 
-                // Проверяем пересечения с моделью
                 const intersects = this.raycaster.intersectObject(this.model, true);
                 
                 if (intersects.length > 0) {
-                    // Кликнули по голове!
                     this.animateHeadClick();
                 }
             }
             
-            // 3D анимация
             init3D() {
                 console.log('Инициализация 3D');
                 const container = document.getElementById('canvas-container');
@@ -671,29 +702,21 @@
                     return;
                 }
                 
-                // Сцена
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0xfff0f5);
                 
-                // Камера
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 15);
                 
-                // Рендерер
                 this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
                 this.renderer.setSize(container.clientWidth, container.clientHeight);
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 container.appendChild(this.renderer.domElement);
                 
-                // Добавляем обработчик клика на canvas
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
-                this.renderer.domElement.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    this.onCanvasClick(e.touches[0]);
-                });
                 
-                // МЯГКОЕ МАТОВОЕ ОСВЕЩЕНИЕ
+                // Освещение
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
                 this.scene.add(ambientLight);
                 
@@ -704,17 +727,6 @@
                 const frontLight = new THREE.DirectionalLight(0xffffff, 0.3);
                 frontLight.position.set(0, 0, 5);
                 this.scene.add(frontLight);
-                
-                const leftLight = new THREE.DirectionalLight(0xffffff, 0.25);
-                leftLight.position.set(-3, 1, 3);
-                this.scene.add(leftLight);
-                
-                const rightLight = new THREE.DirectionalLight(0xffffff, 0.25);
-                rightLight.position.set(3, 1, 3);
-                this.scene.add(rightLight);
-                
-                // Туман
-                this.scene.fog = new THREE.Fog(0xfff0f5, 10, 30);
                 
                 // Звездочки
                 const starsGeometry = new THREE.BufferGeometry();
@@ -731,8 +743,7 @@
                     color: 0xffa5b9, 
                     size: 0.12,
                     transparent: true,
-                    opacity: 0.4,
-                    blending: THREE.AdditiveBlending
+                    opacity: 0.4
                 });
                 const stars = new THREE.Points(starsGeometry, starsMaterial);
                 this.scene.add(stars);
@@ -746,7 +757,6 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // Центрируем и масштабируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
@@ -784,12 +794,11 @@
             
             createPlaceholderHead() {
                 console.log('Создаем заглушку');
-                // Заглушка с матовым материалом
+                
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
                 const material = new THREE.MeshStandardMaterial({ 
                     color: 0xffb6c1,
-                    roughness: 0.7,
-                    metalness: 0.1
+                    roughness: 0.7
                 });
                 const sphere = new THREE.Mesh(geometry, material);
                 
@@ -827,17 +836,15 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // Вращение на 10% быстрее
                     this.model.rotation.y += 0.0033;
                     
-                    // Плавное покачивание
                     const time = this.clock.getElapsedTime();
                     this.model.position.y = Math.sin(time * 1.2) * 0.15;
-                    this.model.rotation.x = Math.sin(time * 0.4) * 0.03;
-                    this.model.rotation.z = Math.sin(time * 0.6) * 0.03;
                 }
                 
-                this.renderer.render(this.scene, this.camera);
+                if (this.renderer && this.scene && this.camera) {
+                    this.renderer.render(this.scene, this.camera);
+                }
             }
             
             onWindowResize() {
@@ -866,28 +873,13 @@
                     this.crtEffect.classList.remove('active');
                 }, 1000);
             }
-            
-            onEnded() {
-                console.log('Воспроизведение закончено');
-                this.stopMouthAnimation();
-                this.stopSubtitles();
-                
-                if (this.currentState === 'hello') {
-                    this.currentState = 'thanks';
-                    this.button.textContent = 'thanks';
-                } else {
-                    if (!this.hasSecondEnded) {
-                        this.hasSecondEnded = true;
-                        this.playTransition();
-                    }
-                    this.currentState = 'hello';
-                    this.button.textContent = 'hello';
-                }
-                
-                this.button.classList.remove('playing');
-                this.isPlaying = false;
-            }
-            
-            onError(e) {
-                console.error('Ошибка аудио:', e);
-               
+        }
+
+        // Запуск после загрузки страницы
+        window.addEventListener('load', () => {
+            console.log('Страница загружена');
+            new BirthdayParty();
+        });
+    </script>
+</body>
+</html>
