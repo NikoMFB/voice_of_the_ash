@@ -162,8 +162,8 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
-            opacity: 0.6;
-            filter: brightness(0.8) contrast(1.1);
+            opacity: 0.7;
+            filter: brightness(0.9) contrast(1.1);
         }
 
         /* Полупрозрачная накладка для читаемости текста */
@@ -383,10 +383,14 @@
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ -->
-                <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
+                <!-- ВИДЕО НА ФОНЕ (закомментировано, пока не загрузишь видео) -->
+                 <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
                 </video>
+                
+                <!-- Временно используем градиент вместо видео -->
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #1a1a1a 0%, #333333 100%); z-index: 1;"></div>
+                
                 <div class="overlay"></div>
                 
                 <!-- 3D ГОЛОВА -->
@@ -432,14 +436,12 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         class BirthdayParty {
             constructor() {
                 console.log('Конструктор запущен');
                 
                 // Элементы сцены 1 (праздник)
-                this.video = document.getElementById('bgVideo');
                 this.loader = document.getElementById('modelLoader');
                 this.skipButton = document.getElementById('skipButton');
                 this.clickHint = document.getElementById('clickHint');
@@ -500,7 +502,7 @@
                 this.currentSubtitleIndex = -1;
                 
                 // Флаг направления перехода
-                this.transitionDirection = 'toHorror'; // 'toHorror' или 'toParty'
+                this.transitionDirection = 'toHorror';
                 
                 // 3D переменные
                 this.scene = null;
@@ -556,15 +558,17 @@
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 
-                // Запускаем видео
-                if (this.video) {
-                    this.video.play().catch(e => console.log('Видео ждет взаимодействия'));
-                }
-                
-                // Сразу запускаем 3D
+                // Сразу запускаем 3D с заглушкой
                 setTimeout(() => {
                     this.init3D();
                 }, 100);
+                
+                // Скрываем загрузчик через 2 секунды, даже если модель не загрузилась
+                setTimeout(() => {
+                    if (this.loader) {
+                        this.loader.style.display = 'none';
+                    }
+                }, 2000);
                 
                 console.log('Инициализация завершена');
             }
@@ -597,7 +601,7 @@
                     .then(() => console.log('Аудио играет'))
                     .catch(e => {
                         console.error('Ошибка воспроизведения:', e);
-                        alert(`Файл ${audioFile} не найден!`);
+                        alert(`Файл ${audioFile} не найден! Проверьте название файла.`);
                         this.stopPlayback();
                     });
             }
@@ -767,7 +771,7 @@
             }
             
             init3D() {
-                console.log('Инициализация 3D');
+                console.log('Инициализация 3D с заглушкой');
                 const container = document.getElementById('canvas-container');
                 
                 if (!container) {
@@ -776,143 +780,100 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x000000); // Черный фон (видео будет видно)
+                this.scene.background = new THREE.Color(0x000000);
                 
-                // КАМЕРА БЛИЖЕ В 2 РАЗА (было 15, стало 7.5)
+                // КАМЕРА БЛИЖЕ В 2 РАЗА
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 7.5);
                 
-                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true для прозрачности
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                 this.renderer.setSize(container.clientWidth, container.clientHeight);
                 this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.renderer.setClearColor(0x000000, 0); // Прозрачный фон
+                this.renderer.setClearColor(0x000000, 0);
                 container.appendChild(this.renderer.domElement);
                 
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
                 // ЕСТЕСТВЕННОЕ БЕЛОЕ ОСВЕЩЕНИЕ
-                // Основной мягкий свет
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
                 this.scene.add(ambientLight);
                 
-                // Передний свет
                 const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
                 frontLight.position.set(0, 1, 3);
                 this.scene.add(frontLight);
                 
-                // Задний свет для объема
                 const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
                 backLight.position.set(0, 0, -3);
                 this.scene.add(backLight);
                 
-                // Верхний свет
                 const topLight = new THREE.DirectionalLight(0xffffff, 0.5);
                 topLight.position.set(0, 3, 1);
                 this.scene.add(topLight);
                 
-                // Боковые света
-                const leftLight = new THREE.DirectionalLight(0xffffff, 0.3);
-                leftLight.position.set(-2, 1, 2);
-                this.scene.add(leftLight);
-                
-                const rightLight = new THREE.DirectionalLight(0xffffff, 0.3);
-                rightLight.position.set(2, 1, 2);
-                this.scene.add(rightLight);
-                
-                // Легкий fill свет снизу
-                const bottomLight = new THREE.DirectionalLight(0xffffff, 0.2);
-                bottomLight.position.set(0, -2, 1);
-                this.scene.add(bottomLight);
-                
-                const loader = new GLTFLoader();
-                
-                loader.load(
-                    'anime-head.glb',
-                    (gltf) => {
-                        console.log('Модель загружена!');
-                        this.model = gltf.scene;
-                        
-                        // Центрируем
-                        const box = new THREE.Box3().setFromObject(this.model);
-                        const center = box.getCenter(new THREE.Vector3());
-                        this.model.position.sub(center);
-                        
-                        const size = box.getSize(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2.2 / maxDim;
-                        this.model.scale.set(scale, scale, scale);
-                        this.originalScale = scale;
-                        
-                        this.scene.add(this.model);
-                        
-                        if (this.loader) {
-                            this.loader.style.display = 'none';
-                        }
-                    },
-                    (xhr) => {
-                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                        if (this.loader) {
-                            this.loader.textContent = `✨ ${percent}% ✨`;
-                        }
-                    },
-                    (error) => {
-                        console.error('Ошибка загрузки модели:', error);
-                        this.createPlaceholderHead();
-                    }
-                );
-                
-                this.animate();
-                
-                window.addEventListener('resize', () => this.onWindowResize());
+                // Вместо загрузки модели создаем простую заглушку
+                this.createPlaceholderHead();
             }
             
             createPlaceholderHead() {
-                console.log('Создаем заглушку');
+                console.log('Создаем заглушку - стильную 3D голову');
                 
-                const geometry = new THREE.SphereGeometry(1, 32, 32);
+                // Основная голова - сфера
+                const geometry = new THREE.SphereGeometry(1, 64, 64);
                 const material = new THREE.MeshStandardMaterial({ 
                     color: 0xffffff,
-                    roughness: 0.3,
+                    roughness: 0.2,
                     metalness: 0.1,
                     emissive: 0x222222
                 });
-                const sphere = new THREE.Mesh(geometry, material);
+                const head = new THREE.Mesh(geometry, material);
                 
-                // Глазки
-                const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
+                // Глаза
+                const eyeGeo = new THREE.SphereGeometry(0.15, 32, 32);
                 const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
                 
                 const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye1.position.set(-0.4, 0.3, 0.85);
-                sphere.add(eye1);
+                eye1.position.set(-0.35, 0.3, 0.9);
+                head.add(eye1);
                 
                 const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye2.position.set(0.4, 0.3, 0.85);
-                sphere.add(eye2);
+                eye2.position.set(0.35, 0.3, 0.9);
+                head.add(eye2);
                 
                 // Блики в глазах
-                const sparkleGeo = new THREE.SphereGeometry(0.05, 8, 8);
+                const sparkleGeo = new THREE.SphereGeometry(0.04, 16, 16);
                 const sparkleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
                 
                 const sparkle1 = new THREE.Mesh(sparkleGeo, sparkleMat);
-                sparkle1.position.set(-0.35, 0.35, 0.95);
-                sphere.add(sparkle1);
+                sparkle1.position.set(-0.3, 0.35, 0.98);
+                head.add(sparkle1);
                 
                 const sparkle2 = new THREE.Mesh(sparkleGeo, sparkleMat);
-                sparkle2.position.set(0.45, 0.35, 0.95);
-                sphere.add(sparkle2);
+                sparkle2.position.set(0.4, 0.35, 0.98);
+                head.add(sparkle2);
+                
+                // Румянец
+                const blushGeo = new THREE.SphereGeometry(0.1, 16, 16);
+                const blushMat = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
+                
+                const blush1 = new THREE.Mesh(blushGeo, blushMat);
+                blush1.position.set(-0.7, 0.1, 0.7);
+                head.add(blush1);
+                
+                const blush2 = new THREE.Mesh(blushGeo, blushMat);
+                blush2.position.set(0.7, 0.1, 0.7);
+                head.add(blush2);
                 
                 // Ротик
-                const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
-                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
+                const mouthGeo = new THREE.TorusGeometry(0.2, 0.03, 16, 32, Math.PI);
+                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff6666 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
                 mouth.rotation.x = Math.PI / 2;
                 mouth.rotation.z = Math.PI;
-                mouth.position.set(0, -0.2, 0.85);
-                sphere.add(mouth);
+                mouth.position.set(0, -0.15, 0.85);
+                head.add(mouth);
                 
-                this.model = sphere;
+                this.model = head;
                 this.scene.add(this.model);
                 this.originalScale = 1;
                 
@@ -925,11 +886,11 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // СКОРОСТЬ ВРАЩЕНИЯ УВЕЛИЧЕНА НА 15% (было 0.0033, стало 0.0038)
+                    // СКОРОСТЬ ВРАЩЕНИЯ УВЕЛИЧЕНА НА 15%
                     this.model.rotation.y += 0.0038;
                     
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = Math.sin(time * 1.5) * 0.2;
+                    this.model.position.y = Math.sin(time * 1.5) * 0.15;
                 }
                 
                 if (this.renderer && this.scene && this.camera) {
@@ -953,4 +914,26 @@
                 setTimeout(() => {
                     if (this.transitionDirection === 'toHorror') {
                         // Из праздника в хоррор
-                        this.page
+                        this.page1.classList.add('hidden');
+                        this.page2.classList.add('visible');
+                    } else {
+                        // Из хоррора в праздник
+                        this.page2.classList.remove('visible');
+                        this.page1.classList.remove('hidden');
+                    }
+                }, 500);
+                
+                setTimeout(() => {
+                    this.crtEffect.classList.remove('active');
+                }, 1000);
+            }
+        }
+
+        // Запуск после загрузки страницы
+        window.addEventListener('load', () => {
+            console.log('Страница загружена');
+            new BirthdayParty();
+        });
+    </script>
+</body>
+</html>
