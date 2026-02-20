@@ -44,7 +44,7 @@
             transition: all 0.5s ease;
         }
 
-        /* СЦЕНА 1 - ПРАЗДНИК (FASHION ВАЙБ) */
+        /* СЦЕНА 1 - ПРАЗДНИК (СТИЛЬ DEFTONES) */
         #page1 {
             opacity: 1;
             z-index: 2;
@@ -142,7 +142,7 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        /* ===== СЦЕНА 1: FASHION ВАЙБ ===== */
+        /* ===== СЦЕНА 1: СТИЛЬ DEFTONES ===== */
         .fashion-page {
             width: 100%;
             height: 100%;
@@ -164,7 +164,7 @@
             filter: brightness(0.9) contrast(1.1);
         }
 
-        /* Полупрозрачная накладка для читаемости текста */
+        /* Полупрозрачная накладка */
         .overlay {
             position: absolute;
             top: 0;
@@ -187,8 +187,8 @@
             pointer-events: auto;
         }
 
-        /* ТЕКСТ - БЕЗ ТЕНЕЙ */
-        .fashion-text {
+        /* ТЕКСТ В СТИЛЕ DEFTONES */
+        .deftones-text {
             position: absolute;
             left: 0;
             width: 100%;
@@ -197,20 +197,26 @@
             font-family: 'Impact', 'Arial Black', 'Helvetica Bold', sans-serif;
             color: white;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 8px;
             font-weight: 900;
-            transform: scaleY(1.1);
+            transform: scaleY(1.2) scaleX(0.9); /* Сплющенный эффект как у Deftones */
             pointer-events: none;
+            text-shadow: 
+                3px 3px 0 rgba(255, 255, 255, 0.3),
+                -3px -3px 0 rgba(0, 0, 0, 0.5);
+            opacity: 0.9;
         }
 
         .text-top {
             top: 15%;
-            font-size: 42px;
+            font-size: 48px;
+            transform: scaleY(1.2) scaleX(0.9) rotate(-2deg); /* Легкий наклон */
         }
 
         .text-bottom {
             bottom: 15%;
-            font-size: 58px;
+            font-size: 64px;
+            transform: scaleY(1.2) scaleX(0.9) rotate(2deg); /* Легкий наклон в другую сторону */
         }
 
         .click-hint {
@@ -228,7 +234,7 @@
             backdrop-filter: blur(5px);
             animation: hintPulse 2s infinite;
             pointer-events: none;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
             text-transform: uppercase;
         }
 
@@ -354,25 +360,22 @@
     <div class="crt-effect" id="crtEffect"></div>
 
     <div class="game-container">
-        <!-- СЦЕНА 1: FASHION ВАЙБ -->
+        <!-- СЦЕНА 1: DEFTONES СТИЛЬ -->
         <div class="page" id="page1">
-            <!-- Крестик для перехода в хоррор -->
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ -->
                 <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
                 </video>
                 
                 <div class="overlay"></div>
                 
-                <!-- 3D ГОЛОВА -->
                 <div id="canvas-container"></div>
                 
-                <!-- ТЕКСТ -->
-                <div class="fashion-text text-top">HAPPY BIRTHDAY</div>
-                <div class="fashion-text text-bottom">MELINA</div>
+                <!-- ТЕКСТ В СТИЛЕ DEFTONES -->
+                <div class="deftones-text text-top">HAPPY BIRTHDAY</div>
+                <div class="deftones-text text-bottom">MELINA</div>
                 
                 <div class="click-hint" id="clickHint">👆 TAP THE HEAD</div>
                 <div class="loader" id="modelLoader">✨ LOADING ✨</div>
@@ -433,7 +436,7 @@
                 
                 console.log('Кнопка найдена:', this.button ? 'да' : 'нет');
                 
-                // ===== МУЗЫКА (только через нажатие на голову) =====
+                // ===== МУЗЫКА =====
                 this.bgMusic = new Audio();
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.5;
@@ -509,31 +512,26 @@
             init() {
                 console.log('Инициализация...');
                 
-                // Крестик на первой странице (праздник -> хоррор)
                 if (this.skipButton) {
                     this.skipButton.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Крестик нажат - переход к хоррору');
-                        
                         this.transitionDirection = 'toHorror';
                         this.playTransition();
                     });
                 }
                 
-                // Крестик на второй странице (хоррор -> праздник)
                 if (this.skipButton2) {
                     this.skipButton2.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Крестик в хорроре нажат - возврат к празднику');
-                        
                         this.transitionDirection = 'toParty';
                         this.playTransition();
                     });
                 }
                 
-                // Кнопка на второй странице
                 if (this.button) {
                     this.button.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -546,7 +544,6 @@
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 
-                // Сразу запускаем 3D
                 setTimeout(() => {
                     this.init3D();
                 }, 100);
@@ -554,7 +551,6 @@
                 console.log('Инициализация завершена');
             }
             
-            // Функция для плавного изменения скорости вращения
             animateRotationSpeed(targetSpeed) {
                 if (this.rotationAnimation) {
                     cancelAnimationFrame(this.rotationAnimation);
@@ -581,30 +577,21 @@
                 this.rotationAnimation = requestAnimationFrame(animate);
             }
             
-            // Обработчик клика по голове - управление музыкой и вращением
             toggleMusicAndRotation() {
                 if (!this.model) return;
                 
                 if (this.isMusicPlaying) {
-                    // Останавливаем музыку и вращение
                     this.bgMusic.pause();
                     this.isMusicPlaying = false;
                     this.animateRotationSpeed(0);
-                    
-                    // Анимация пульсации при остановке
-                    this.animateHeadClick(false);
-                    
+                    this.animateHeadClick();
                     console.log('Музыка остановлена');
                 } else {
-                    // Включаем музыку и вращение
                     this.bgMusic.play()
                         .then(() => {
                             this.isMusicPlaying = true;
                             this.animateRotationSpeed(0.0038);
-                            
-                            // Анимация пульсации при запуске
-                            this.animateHeadClick(true);
-                            
+                            this.animateHeadClick();
                             console.log('Музыка играет');
                         })
                         .catch(e => {
@@ -613,8 +600,7 @@
                 }
             }
             
-            // Анимация пульсации при клике
-            animateHeadClick(playMusic = true) {
+            animateHeadClick() {
                 if (this.isAnimating || !this.model) return;
                 
                 this.isAnimating = true;
@@ -745,7 +731,6 @@
                 this.stopMouthAnimation();
                 this.stopSubtitles();
                 
-                // Переключаем состояние
                 if (this.currentState === 'hello') {
                     this.currentState = 'thanks';
                     if (this.button) this.button.textContent = 'thanks';
@@ -825,27 +810,27 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // ОСВЕЩЕНИЕ
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                // ОСВЕЩЕНИЕ - усилено чтобы модель была видна
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
                 this.scene.add(ambientLight);
                 
-                const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                frontLight.position.set(0, 1, 3);
+                const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                frontLight.position.set(0, 2, 5);
                 this.scene.add(frontLight);
                 
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
-                backLight.position.set(0, 0, -3);
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                backLight.position.set(0, 1, -5);
                 this.scene.add(backLight);
                 
-                const topLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                topLight.position.set(0, 3, 1);
+                const topLight = new THREE.DirectionalLight(0xffffff, 1.0);
+                topLight.position.set(0, 5, 2);
                 this.scene.add(topLight);
                 
-                // Загружаем ТВОЮ 3D модель (без заглушки)
+                // Загружаем ТВОЮ 3D модель
                 const loader = new GLTFLoader();
                 
                 loader.load(
-                    'anime-head.glb', // твой файл
+                    'anime-head.glb',
                     (gltf) => {
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
@@ -876,7 +861,6 @@
                     },
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
-                        alert('3D модель не найдена! Проверьте файл anime-head.glb');
                         if (this.loader) {
                             this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
                         }
