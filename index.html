@@ -112,67 +112,48 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик на сцене 1 – без рамки, повышенная прозрачность */
+        /* Крестик на сцене 1 – голый, без фона, прозрачность 0.4, смещён */
         .skip-cross {
             position: absolute;
-            top: 60px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(0, 0, 0, 0.3); /* прозрачность увеличена */
-            border: none; /* рамка убрана */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.8);
+            top: 80px;          /* опущен на ~20px от исходного 60px */
+            right: 15px;         /* сдвинут влево на 5px от исходного 20px */
+            color: rgba(255, 255, 255, 0.4); /* прозрачность 40% */
+            font-family: 'Arial', sans-serif;
             font-size: 36px;
             font-weight: 300;
             cursor: pointer;
             z-index: 2147483647;
             user-select: none;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s ease;
+            line-height: 1;
+            transition: opacity 0.2s ease;
             pointer-events: auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .skip-cross:hover,
         .skip-cross:active {
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            transform: scale(1.1);
+            color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Крестик на сцене 2 – без рамки, повышенная прозрачность */
+        /* Крестик на сцене 2 */
         .skip-cross2 {
             position: absolute;
-            top: 60px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
+            top: 80px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'Arial', sans-serif;
             font-size: 36px;
             font-weight: 300;
             cursor: pointer;
             z-index: 2147483647;
             user-select: none;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s ease;
+            line-height: 1;
+            transition: opacity 0.2s ease;
             pointer-events: auto;
         }
 
         .skip-cross2:hover,
         .skip-cross2:active {
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            transform: scale(1.1);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         /* Сцена 1: голова на видео */
