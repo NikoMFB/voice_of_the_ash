@@ -1,4 +1,404 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OPEN ME</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Courier', monospace;
+            touch-action: manipulation;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 390px;
+            height: 100vh;
+            max-height: 844px;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+            margin: 0 auto;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: all 0.5s ease;
+        }
+
+        /* СЦЕНА 1 - ПРАЗДНИК */
+        #page1 {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        #page1.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* СЦЕНА 2 - ХОРРОР */
+        #page2 {
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #page2.visible {
+            opacity: 1;
+            z-index: 3;
+            pointer-events: auto;
+        }
+
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .crt-effect.active {
+            animation: crtShutdown 0.5s forwards;
+        }
+
+        @keyframes crtShutdown {
+            0% { opacity: 0; transform: scale(1); }
+            10% { opacity: 0.8; transform: scale(0.98); }
+            20% { opacity: 1; transform: scale(0.95); }
+            30% { opacity: 0.9; transform: scale(0.9) skewX(2deg); }
+            40% { opacity: 1; transform: scale(0.85) skewX(-2deg); }
+            50% { opacity: 0.7; transform: scale(0.8) skewX(3deg); filter: brightness(2); }
+            60% { opacity: 0.9; transform: scale(0.7); filter: brightness(1); }
+            70% { opacity: 0.5; transform: scale(0.5) skewX(-5deg); }
+            80% { opacity: 0.8; transform: scale(0.3); filter: brightness(0.5); }
+            90% { opacity: 0.3; transform: scale(0.1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* КРЕСТИК НА СЦЕНЕ 1 */
+        .skip-cross {
+            position: absolute;
+            top: 60px;
+            right: 25px;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            font-weight: 300;
+            cursor: pointer;
+            z-index: 10000;
+            user-select: none;
+            line-height: 1;
+            transition: opacity 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .skip-cross:hover,
+        .skip-cross:active {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* КРЕСТИК НА СЦЕНЕ 2 */
+        .skip-cross2 {
+            position: absolute;
+            top: 60px;
+            right: 25px;
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            font-weight: 300;
+            cursor: pointer;
+            z-index: 10000;
+            user-select: none;
+            line-height: 1;
+            transition: opacity 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .skip-cross2:hover,
+        .skip-cross2:active {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ===== СЦЕНА 1: FASHION ВАЙБ ===== */
+        .fashion-page {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.7;
+            filter: brightness(0.9) contrast(1.1);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        .fashion-text {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 50;
+            font-family: 'Impact', 'Cooper Black', 'Arial Black', sans-serif;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 900;
+            pointer-events: none;
+        }
+
+        .text-top {
+            top: 15%;
+            font-size: 42px;
+        }
+
+        .text-bottom {
+            bottom: 15%;
+            font-size: 58px;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            animation: hintPulse 2s infinite;
+            pointer-events: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 16px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            letter-spacing: 2px;
+        }
+
+        /* ===== СЦЕНА 2: ХОРРОР ===== */
+        .horror-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        #characterImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                        transparent 40%, 
+                        rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .subtitles-container {
+            position: absolute;
+            bottom: 180px;
+            left: 0;
+            width: 100%;
+            padding: 0 25px;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .subtitles {
+            color: #f0e68c;
+            font-family: 'Courier New', 'Courier', monospace;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: center;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+            max-width: 100%;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            text-transform: uppercase;
+        }
+
+        .subtitles.visible {
+            opacity: 1;
+        }
+
+        .bottom-area {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 240, 0.25);
+            color: rgba(255, 255, 240, 0.9);
+            font-family: 'Courier New', 'Courier', monospace;
+            font-size: 22px;
+            letter-spacing: 3px;
+            padding: 12px 40px;
+            cursor: pointer;
+            pointer-events: auto;
+            backdrop-filter: blur(2px);
+            transition: all 0.2s ease;
+            text-transform: lowercase;
+            min-width: 180px;
+            text-align: center;
+            position: relative;
+            z-index: 31;
+        }
+
+        .action-button.playing {
+            background: rgba(255, 255, 200, 0.2);
+            border: 1px solid rgba(255, 255, 200, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-effect" id="crtEffect"></div>
+
+    <div class="game-container">
+        <!-- СЦЕНА 1: ПРАЗДНИК -->
+        <div class="page" id="page1">
+            <div class="skip-cross" id="skipButton">✕</div>
+            
+            <div class="fashion-page">
+                <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
+                    <source src="fashion-bg.mp4" type="video/mp4">
+                </video>
+                
+                <div class="overlay"></div>
+                
+                <div id="canvas-container"></div>
+                
+                <div class="fashion-text text-top">HAPPY BIRTHDAY</div>
+                <div class="fashion-text text-bottom">MELINA</div>
+                
+                <div class="click-hint" id="clickHint">👆 TAP THE HEAD</div>
+                <div class="loader" id="modelLoader">✨ LOADING ✨</div>
+            </div>
+        </div>
+
+        <!-- СЦЕНА 2: ХОРРОР -->
+        <div class="page" id="page2">
+            <div class="skip-cross2" id="skipButton2">✕</div>
+            
+            <div class="horror-container">
+                <img src="mouth-closed.png" alt="" id="characterImage">
+                <div class="vignette"></div>
+            </div>
+            
+            <div class="subtitles-container">
+                <div class="subtitles" id="subtitles"></div>
+            </div>
+            
+            <div class="bottom-area">
+                <button class="action-button" id="actionButton">hello</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -367,16 +767,16 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x000000);
+                this.scene.background = new THREE.Color(0x000000); // Черный фон для видео
                 
-                // КАМЕРА КАК В СЦЕНЕ 2 (ДАЛЬШЕ)
+                // >>>>>>>>> ТОЧНО КАК В ТВОЕМ РАБОЧЕМ КОДЕ <<<<<<<<<
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-                this.camera.position.set(0, 0, 15); // КАК В СЦЕНЕ 2!
+                this.camera.position.set(0, 0, 15); // ТОЧНО КАК В ТВОЕМ КОДЕ!
                 
-                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true для прозрачности
                 this.renderer.setSize(container.clientWidth, container.clientHeight);
                 this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.renderer.setClearColor(0x000000, 0);
+                this.renderer.setClearColor(0x000000, 0); // Прозрачный фон
                 
                 this.renderer.domElement.style.position = 'absolute';
                 this.renderer.domElement.style.top = '0';
@@ -389,17 +789,28 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // ОСВЕЩЕНИЕ КАК В СЦЕНЕ 2 (БЕЛОЕ, НО НЕ СЛИШКОМ ЯРКОЕ)
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-                this.scene.add(ambientLight);
+                // БЕЗ ОСВЕЩЕНИЯ - ТОЧНО КАК В ТВОЕМ КОДЕ!
+                // (у тебя нет источников света)
                 
-                const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                frontLight.position.set(0, 2, 5);
-                this.scene.add(frontLight);
+                // Звездочки - ТОЧНО КАК В ТВОЕМ КОДЕ
+                const starsGeometry = new THREE.BufferGeometry();
+                const starsCount = 200;
+                const starsPositions = new Float32Array(starsCount * 3);
+                for (let i = 0; i < starsCount * 3; i += 3) {
+                    starsPositions[i] = (Math.random() - 0.5) * 30;
+                    starsPositions[i+1] = (Math.random() - 0.5) * 30;
+                    starsPositions[i+2] = (Math.random() - 0.5) * 15 - 5;
+                }
+                starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
                 
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
-                backLight.position.set(0, 1, -5);
-                this.scene.add(backLight);
+                const starsMaterial = new THREE.PointsMaterial({ 
+                    color: 0xfff0f5, // Розоватые звездочки как в твоем коде
+                    size: 0.1,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const stars = new THREE.Points(starsGeometry, starsMaterial);
+                this.scene.add(stars);
                 
                 // Загружаем модель
                 const loader = new GLTFLoader();
@@ -410,15 +821,14 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // Центрируем
+                        // >>>>>>>>> ТОЧНО КАК В ТВОЕМ РАБОЧЕМ КОДЕ <<<<<<<<<
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
                         
-                        // МАСШТАБ КАК В СЦЕНЕ 2
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2.2 / maxDim; // КАК В СЦЕНЕ 2
+                        const scale = 2.2 / maxDim; // ТОЧНО КАК В ТВОЕМ КОДЕ!
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
@@ -428,7 +838,6 @@
                             this.loader.style.display = 'none';
                         }
                         
-                        // Проверяем позицию модели
                         console.log('Модель добавлена в сцену', this.model.position);
                     },
                     (xhr) => {
@@ -442,18 +851,63 @@
                         if (this.loader) {
                             this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
                         }
+                        this.createPlaceholderHead();
                     }
                 );
+                
+                this.animate();
+                
+                window.addEventListener('resize', () => this.onWindowResize());
+            }
+            
+            createPlaceholderHead() {
+                console.log('Создаем заглушку');
+                
+                const geometry = new THREE.SphereGeometry(1, 32, 32);
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: 0xffaaaa,
+                    emissive: 0x442222,
+                    roughness: 0.5
+                });
+                const sphere = new THREE.Mesh(geometry, material);
+                
+                const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
+                const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+                
+                const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
+                eye1.position.set(-0.4, 0.3, 0.85);
+                sphere.add(eye1);
+                
+                const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
+                eye2.position.set(0.4, 0.3, 0.85);
+                sphere.add(eye2);
+                
+                const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
+                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xaa5555 });
+                const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+                mouth.rotation.x = Math.PI / 2;
+                mouth.rotation.z = Math.PI;
+                mouth.position.set(0, -0.2, 0.85);
+                sphere.add(mouth);
+                
+                this.model = sphere;
+                this.scene.add(this.model);
+                this.originalScale = 1;
+                
+                if (this.loader) {
+                    this.loader.style.display = 'none';
+                }
             }
             
             animate() {
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    this.model.rotation.y += this.currentRotationSpeed;
+                    // Скорость вращения как в твоем коде
+                    this.model.rotation.y += 0.0033; // ТОЧНО КАК В ТВОЕМ КОДЕ!
                     
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = Math.sin(time * 1.5) * 0.15;
+                    this.model.position.y = Math.sin(time * 1.5) * 0.2; // ТОЧНО КАК В ТВОЕМ КОДЕ!
                 }
                 
                 if (this.renderer && this.scene && this.camera) {
@@ -501,3 +955,5 @@
             new BirthdayParty();
         });
     </script>
+</body>
+</html>
