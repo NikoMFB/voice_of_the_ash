@@ -183,8 +183,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 100; /* Очень высокий z-index */
-            pointer-events: auto; /* Чтобы можно было кликать */
+            z-index: 100;
+            pointer-events: auto;
         }
 
         /* ТЕКСТ - БЕЗ ТЕНЕЙ */
@@ -193,15 +193,14 @@
             left: 0;
             width: 100%;
             text-align: center;
-            z-index: 50; /* Выше фона, но ниже 3D */
+            z-index: 50;
             font-family: 'Impact', 'Arial Black', 'Helvetica Bold', sans-serif;
             color: white;
             text-transform: uppercase;
             letter-spacing: 4px;
             font-weight: 900;
             transform: scaleY(1.1);
-            pointer-events: none; /* Чтобы не мешать кликам по 3D */
-            /* ТЕНИ ПОЛНОСТЬЮ УБРАНЫ */
+            pointer-events: none;
         }
 
         .text-top {
@@ -252,6 +251,32 @@
             border-radius: 30px;
             backdrop-filter: blur(5px);
             letter-spacing: 2px;
+        }
+
+        /* КНОПКА ВКЛ/ВЫКЛ МУЗЫКИ (опционально) */
+        .music-toggle {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10001;
+            background: rgba(0,0,0,0.3);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.2s;
+        }
+
+        .music-toggle:hover {
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0,0,0,0.5);
         }
 
         /* ===== СЦЕНА 2: ХОРРОР ===== */
@@ -360,21 +385,24 @@
             <!-- Крестик для перехода в хоррор -->
             <div class="skip-cross" id="skipButton">✕</div>
             
+            <!-- Кнопка управления музыкой (опционально) -->
+            <div class="music-toggle" id="musicToggle">🔊</div>
+            
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ (раскомментируй, когда загрузишь видео) -->
+                <!-- ВИДЕО НА ФОНЕ -->
                 <!-- <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
                 </video> -->
                 
-                <!-- Временный градиент вместо видео -->
+                <!-- Временный градиент -->
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #1a1a1a 0%, #333333 100%); z-index: 1;"></div>
                 
                 <div class="overlay"></div>
                 
-                <!-- 3D ГОЛОВА - ТЕПЕРЬ ТОЧНО ПОВЕРХ ВСЕГО (z-index: 100) -->
+                <!-- 3D ГОЛОВА -->
                 <div id="canvas-container"></div>
                 
-                <!-- ТЕКСТ - БЕЗ ТЕНЕЙ -->
+                <!-- ТЕКСТ -->
                 <div class="fashion-text text-top">HAPPY BIRTHDAY</div>
                 <div class="fashion-text text-bottom">MELINA</div>
                 
@@ -385,7 +413,6 @@
 
         <!-- СЦЕНА 2: ХОРРОР -->
         <div class="page" id="page2">
-            <!-- Крестик для возврата в праздник -->
             <div class="skip-cross2" id="skipButton2">✕</div>
             
             <div class="horror-container">
@@ -423,6 +450,7 @@
                 this.loader = document.getElementById('modelLoader');
                 this.skipButton = document.getElementById('skipButton');
                 this.clickHint = document.getElementById('clickHint');
+                this.musicToggle = document.getElementById('musicToggle');
                 
                 // Элементы сцены 2 (хоррор)
                 this.image = document.getElementById('characterImage');
@@ -437,7 +465,57 @@
                 
                 console.log('Кнопка найдена:', this.button ? 'да' : 'нет');
                 
-                // Аудио файлы
+                // ===== МУЗЫКА ДЛЯ СЦЕНЫ 1 =====
+                this.bgMusic = new Audio();
+                this.bgMusic.loop = true;
+                this.bgMusic.volume = 0.5;
+                this.isMusicPlaying = false;
+                
+                // Указываем файл с музыкой (замени на свой)
+                this.bgMusic.src = 'fashion-music.mp3';
+                
+                // Пытаемся включить музыку при загрузке
+                this.bgMusic.play()
+                    .then(() => {
+                        console.log('Музыка играет');
+                        this.isMusicPlaying = true;
+                        if (this.musicToggle) this.musicToggle.textContent = '🔊';
+                    })
+                    .catch(e => {
+                        console.log('Автовоспроизведение заблокировано браузером. Ждем взаимодействия пользователя');
+                        // На мобильных устройствах нужно первое касание
+                        document.addEventListener('touchstart', () => {
+                            if (!this.isMusicPlaying) {
+                                this.bgMusic.play()
+                                    .then(() => {
+                                        this.isMusicPlaying = true;
+                                        if (this.musicToggle) this.musicToggle.textContent = '🔊';
+                                    })
+                                    .catch(err => console.log('Все еще не получается:', err));
+                            }
+                        }, { once: true });
+                    });
+                
+                // Кнопка вкл/выкл музыки
+                if (this.musicToggle) {
+                    this.musicToggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (this.isMusicPlaying) {
+                            this.bgMusic.pause();
+                            this.isMusicPlaying = false;
+                            this.musicToggle.textContent = '🔈';
+                        } else {
+                            this.bgMusic.play()
+                                .then(() => {
+                                    this.isMusicPlaying = true;
+                                    this.musicToggle.textContent = '🔊';
+                                })
+                                .catch(err => console.log('Не удалось включить музыку'));
+                        }
+                    });
+                }
+                
+                // Аудио файлы для второй сцены
                 this.audioFiles = {
                     hello: 'voice1.mp3',
                     thanks: 'voice2.mp3'
@@ -507,6 +585,12 @@
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Крестик нажат - переход к хоррору');
+                        
+                        // При переходе в хоррор, убавляем музыку
+                        if (this.isMusicPlaying) {
+                            this.bgMusic.volume = 0.2;
+                        }
+                        
                         this.transitionDirection = 'toHorror';
                         this.playTransition();
                     });
@@ -518,6 +602,12 @@
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Крестик в хорроре нажат - возврат к празднику');
+                        
+                        // При возврате в праздник, возвращаем громкость
+                        if (this.isMusicPlaying) {
+                            this.bgMusic.volume = 0.5;
+                        }
+                        
                         this.transitionDirection = 'toParty';
                         this.playTransition();
                     });
@@ -760,7 +850,6 @@
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x000000);
                 
-                // КАМЕРА
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 7.5);
                 
@@ -769,7 +858,6 @@
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.renderer.setClearColor(0x000000, 0);
                 
-                // Убеждаемся, что canvas имеет высокий z-index
                 this.renderer.domElement.style.position = 'absolute';
                 this.renderer.domElement.style.top = '0';
                 this.renderer.domElement.style.left = '0';
@@ -797,14 +885,13 @@
                 topLight.position.set(0, 3, 1);
                 this.scene.add(topLight);
                 
-                // Создаем заглушку - стильную 3D голову
+                // Создаем заглушку
                 this.createPlaceholderHead();
             }
             
             createPlaceholderHead() {
                 console.log('Создаем заглушку');
                 
-                // Основная голова - сфера
                 const geometry = new THREE.SphereGeometry(1, 64, 64);
                 const material = new THREE.MeshStandardMaterial({ 
                     color: 0xffffff,
@@ -826,7 +913,7 @@
                 eye2.position.set(0.35, 0.3, 0.9);
                 head.add(eye2);
                 
-                // Блики в глазах
+                // Блики
                 const sparkleGeo = new THREE.SphereGeometry(0.04, 16, 16);
                 const sparkleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
                 
