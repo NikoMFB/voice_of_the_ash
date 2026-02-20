@@ -184,6 +184,7 @@
             pointer-events: auto;
         }
 
+        /* ТЕКСТ */
         .fashion-text {
             position: absolute;
             left: 0;
@@ -354,6 +355,7 @@
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
+                <!-- ВИДЕО НА ФОНЕ -->
                 <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
                 </video>
@@ -767,13 +769,13 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x000000); // Черный фон для видео
+                this.scene.background = null; // Прозрачный фон для видео
                 
-                // >>>>>>>>> ТОЧНО КАК В ТВОЕМ РАБОЧЕМ КОДЕ <<<<<<<<<
+                // КАМЕРА - оптимальное расстояние
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-                this.camera.position.set(0, 0, 15); // ТОЧНО КАК В ТВОЕМ КОДЕ!
+                this.camera.position.set(0, 0, 12);
                 
-                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true для прозрачности
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                 this.renderer.setSize(container.clientWidth, container.clientHeight);
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.renderer.setClearColor(0x000000, 0); // Прозрачный фон
@@ -789,28 +791,17 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // БЕЗ ОСВЕЩЕНИЯ - ТОЧНО КАК В ТВОЕМ КОДЕ!
-                // (у тебя нет источников света)
+                // МЯГКОЕ ОСВЕЩЕНИЕ
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                this.scene.add(ambientLight);
                 
-                // Звездочки - ТОЧНО КАК В ТВОЕМ КОДЕ
-                const starsGeometry = new THREE.BufferGeometry();
-                const starsCount = 200;
-                const starsPositions = new Float32Array(starsCount * 3);
-                for (let i = 0; i < starsCount * 3; i += 3) {
-                    starsPositions[i] = (Math.random() - 0.5) * 30;
-                    starsPositions[i+1] = (Math.random() - 0.5) * 30;
-                    starsPositions[i+2] = (Math.random() - 0.5) * 15 - 5;
-                }
-                starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+                const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
+                frontLight.position.set(0, 2, 5);
+                this.scene.add(frontLight);
                 
-                const starsMaterial = new THREE.PointsMaterial({ 
-                    color: 0xfff0f5, // Розоватые звездочки как в твоем коде
-                    size: 0.1,
-                    transparent: true,
-                    opacity: 0.2
-                });
-                const stars = new THREE.Points(starsGeometry, starsMaterial);
-                this.scene.add(stars);
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                backLight.position.set(0, 1, -5);
+                this.scene.add(backLight);
                 
                 // Загружаем модель
                 const loader = new GLTFLoader();
@@ -821,14 +812,15 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // >>>>>>>>> ТОЧНО КАК В ТВОЕМ РАБОЧЕМ КОДЕ <<<<<<<<<
+                        // Центрируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
                         
+                        // Масштабируем
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2.2 / maxDim; // ТОЧНО КАК В ТВОЕМ КОДЕ!
+                        const scale = 2.0 / maxDim;
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
@@ -838,7 +830,7 @@
                             this.loader.style.display = 'none';
                         }
                         
-                        console.log('Модель добавлена в сцену', this.model.position);
+                        console.log('Модель добавлена. Масштаб:', scale);
                     },
                     (xhr) => {
                         const percent = Math.floor((xhr.loaded / xhr.total) * 100);
@@ -854,10 +846,6 @@
                         this.createPlaceholderHead();
                     }
                 );
-                
-                this.animate();
-                
-                window.addEventListener('resize', () => this.onWindowResize());
             }
             
             createPlaceholderHead() {
@@ -903,11 +891,10 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // Скорость вращения как в твоем коде
-                    this.model.rotation.y += 0.0033; // ТОЧНО КАК В ТВОЕМ КОДЕ!
+                    this.model.rotation.y += this.currentRotationSpeed;
                     
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = Math.sin(time * 1.5) * 0.2; // ТОЧНО КАК В ТВОЕМ КОДЕ!
+                    this.model.position.y = Math.sin(time * 1.5) * 0.15;
                 }
                 
                 if (this.renderer && this.scene && this.camera) {
