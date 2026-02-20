@@ -44,8 +44,8 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
-            opacity: 0.7;
-            filter: brightness(0.9) contrast(1.1);
+            opacity: 1; /* Полная видимость */
+            filter: none; /* Убрали затемнение */
             pointer-events: none;
         }
 
@@ -111,14 +111,14 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик на сцене 1 – ПОВЫШЕННЫЙ Z-INDEX И ГАРАНТИРОВАННАЯ ВИДИМОСТЬ */
+        /* Крестик на сцене 1 – всегда видимый */
         .skip-cross {
             position: absolute;
             top: 60px;
             right: 25px;
-            color: rgba(255, 255, 255, 0.7); /* чуть ярче */
+            color: rgba(255, 255, 255, 0.9);
             font-family: 'Arial', sans-serif;
-            font-size: 42px; /* чуть крупнее */
+            font-size: 48px;
             font-weight: 300;
             cursor: pointer;
             z-index: 10000;
@@ -126,12 +126,12 @@
             line-height: 1;
             transition: opacity 0.2s ease;
             pointer-events: auto;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            text-shadow: 0 0 15px rgba(0,0,0,0.7);
         }
 
         .skip-cross:hover,
         .skip-cross:active {
-            color: rgba(255, 255, 255, 1);
+            color: white;
         }
 
         /* Крестик на сцене 2 */
@@ -156,24 +156,13 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Сцена 1: праздник */
+        /* Сцена 1: праздник (только видео и голова) */
         .fashion-page {
             width: 100%;
             height: 100%;
             position: relative;
             overflow: hidden;
             background: transparent;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            z-index: 2;
-            pointer-events: none;
         }
 
         #canvas-container {
@@ -186,71 +175,8 @@
             pointer-events: auto;
         }
 
-        /* Текст */
-        .fashion-text {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            z-index: 50;
-            font-family: 'Impact', 'Cooper Black', 'Arial Black', sans-serif;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: 900;
-            pointer-events: none;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .text-top {
-            top: 15%;
-            font-size: 42px;
-        }
-
-        .text-bottom {
-            bottom: 15%;
-            font-size: 58px;
-        }
-
-        .click-hint {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-            font-family: 'Impact', 'Arial Black', sans-serif;
-            z-index: 50;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 20px;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-            animation: hintPulse 2s infinite;
-            pointer-events: none;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        @keyframes hintPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: 16px;
-            z-index: 50;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-            letter-spacing: 2px;
-        }
+        /* Текст полностью удалён */
+        /* .fashion-text, .click-hint, .loader удалены */
 
         /* Сцена 2: хоррор (без изменений) */
         .horror-container {
@@ -358,19 +284,13 @@
             <source src="fashion-bg.mp4" type="video/mp4">
         </video>
 
-        <!-- СЦЕНА 1: ПРАЗДНИК -->
+        <!-- СЦЕНА 1: ПРАЗДНИК (только видео и голова) -->
         <div class="page" id="page1">
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
-                <div class="overlay"></div>
                 <div id="canvas-container"></div>
-                
-                <div class="fashion-text text-top">HAPPY BIRTHDAY</div>
-                <div class="fashion-text text-bottom">MELINA</div>
-                
-                <div class="click-hint" id="clickHint">👆 TAP THE HEAD</div>
-                <div class="loader" id="modelLoader">✨ LOADING ✨</div>
+                <!-- Весь текст удалён -->
             </div>
         </div>
 
@@ -411,9 +331,9 @@
                 console.log('Конструктор запущен');
                 
                 // Элементы сцены 1
-                this.loader = document.getElementById('modelLoader');
+                this.loader = document.getElementById('modelLoader'); // больше не используется, но оставим
                 this.skipButton = document.getElementById('skipButton');
-                this.clickHint = document.getElementById('clickHint');
+                this.clickHint = document.getElementById('clickHint'); // удалён, но ссылка остаётся
                 
                 // Элементы сцены 2
                 this.image = document.getElementById('characterImage');
@@ -503,6 +423,7 @@
                     this.skipButton.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        console.log('Крестик нажат – переход к хоррору');
                         this.transitionDirection = 'toHorror';
                         this.playTransition();
                     });
@@ -512,6 +433,7 @@
                     this.skipButton2.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        console.log('Крестик в хорроре нажат – возврат к празднику');
                         this.transitionDirection = 'toParty';
                         this.playTransition();
                     });
@@ -521,6 +443,7 @@
                     this.button.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        console.log('Кнопка в хорроре нажата!');
                         this.onButtonClick();
                     });
                 }
@@ -771,7 +694,7 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = null; // прозрачный для видео
+                this.scene.background = null; // прозрачный
                 
                 // Камера – достаточное расстояние
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -793,15 +716,15 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // Освещение
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                // Освещение (мягкое, без затенения)
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
                 this.scene.add(ambientLight);
                 
-                const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
+                const frontLight = new THREE.DirectionalLight(0xffffff, 1.2);
                 frontLight.position.set(0, 2, 5);
                 this.scene.add(frontLight);
                 
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
                 backLight.position.set(0, 1, -5);
                 this.scene.add(backLight);
                 
@@ -822,31 +745,32 @@
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         
-                        // УВЕЛИЧИВАЕМ В 3 РАЗА (относительно предыдущего масштаба 1.5)
-                        // Будем использовать scale = (1.5 * 3) / maxDim = 4.5 / maxDim
-                        const scale = 4.5 / maxDim; 
+                        // УМЕНЬШАЕМ В 2 РАЗА (было 4.5, теперь 2.25)
+                        const scale = 2.25 / maxDim; 
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
+                        // ПОДНИМАЕМ НА 20% (примерно 0.4 по Y, подбирается)
+                        this.model.position.y += 0.4; 
+                        
                         this.scene.add(this.model);
                         
-                        if (this.loader) {
-                            this.loader.style.display = 'none';
-                        }
+                        // Скрываем загрузчик (если есть)
+                        if (this.loader) this.loader.style.display = 'none';
                         
                         console.log('Модель добавлена. Масштаб:', scale);
                     },
                     (xhr) => {
-                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                        if (this.loader) {
-                            this.loader.textContent = `✨ ${percent}% ✨`;
+                        // Прогресс загрузки – можно игнорировать, т.к. текст убран
+                        // но оставим для отладки
+                        if (xhr.total) {
+                            const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                            console.log(`Загрузка модели: ${percent}%`);
                         }
                     },
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
-                        if (this.loader) {
-                            this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
-                        }
+                        // Если модель не загрузилась, создаём заглушку
                         this.createPlaceholderHead();
                     }
                 );
@@ -890,9 +814,7 @@
                 this.scene.add(this.model);
                 this.originalScale = 1;
                 
-                if (this.loader) {
-                    this.loader.style.display = 'none';
-                }
+                if (this.loader) this.loader.style.display = 'none';
             }
             
             animate() {
@@ -902,7 +824,7 @@
                     this.model.rotation.y += this.currentRotationSpeed;
                     
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = Math.sin(time * 1.5) * 0.15;
+                    this.model.position.y = 0.4 + Math.sin(time * 1.5) * 0.15; // плавание вокруг поднятой позиции
                 }
                 
                 if (this.renderer && this.scene && this.camera) {
@@ -925,6 +847,7 @@
                 
                 setTimeout(() => {
                     if (this.transitionDirection === 'toHorror') {
+                        console.log('Переключение на сцену 2');
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
                         
@@ -934,6 +857,7 @@
                             this.animateRotationSpeed(0);
                         }
                     } else {
+                        console.log('Возврат на сцену 1');
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
                     }
