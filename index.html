@@ -392,50 +392,20 @@
                 
                 console.log('Кнопка найдена:', this.button ? 'да' : 'нет');
                 
-                this.audioFiles = {
-                    hello: 'voice1.mp3',
-                    thanks: 'voice2.mp3'
-                };
+                // ТОЛЬКО ОДИН АУДИОФАЙЛ
+                this.audioFile = 'voice1.mp3';
                 
                 this.bgMusic = new Audio('birthday-music.mp3');
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.4;
                 
-                this.subtitleParts = [
-                    { text: "Соединение прервано.", start: 0, end: 2.5 },
-                    { text: "Мне жаль, что я прерываю вас, Мелина,", start: 2.5, end: 5.5 },
-                    { text: "если вы еще помните это имя,", start: 5.5, end: 8 },
-                    { text: "но боюсь, вас дезинформировали.", start: 8, end: 10.5 },
-                    { text: "Вы здесь не для того,", start: 10.5, end: 12.5 },
-                    { text: "чтобы получить подарок,", start: 12.5, end: 14.5 },
-                    { text: "и вас не позвал сюда человек,", start: 14.5, end: 17 },
-                    { text: "которого вы предполагаете,", start: 17, end: 19 },
-                    { text: "хотя вас действительно позвали.", start: 19, end: 21.5 },
-                    { text: "Вы все были вызваны сюда,", start: 21.5, end: 24 },
-                    { text: "в лабиринт звуков и запахов,", start: 24, end: 26.5 },
-                    { text: "дезинформации и несчастий.", start: 26.5, end: 29 },
-                    { text: "Лабиринт без выхода,", start: 29, end: 31 },
-                    { text: "лабиринт без приза.", start: 31, end: 33 },
-                    { text: "Вы даже не понимаете,", start: 33, end: 35 },
-                    { text: "что попали в ловушку.", start: 35, end: 37 },
-                    { text: "Ваша жажда крови", start: 37, end: 39 },
-                    { text: "загнала вас в бесконечные круги,", start: 39, end: 42 },
-                    { text: "преследуя крики детей", start: 42, end: 44 },
-                    { text: "в какой-то невидимой комнате,", start: 44, end: 46.5 },
-                    { text: "всегда кажущейся такой близкой,", start: 46.5, end: 49 },
-                    { text: "но почему-то недостижимой,", start: 49, end: 51.5 },
-                    { text: "но вы никогда их не найдете.", start: 51.5, end: 54.5 },
-                    { text: "Никто из вас не найдет.", start: 54.5, end: 57 },
-                    { text: "Здесь ваша история заканчивается.", start: 57, end: 60 }
-                ];
+                // УБИРАЕМ ВСЕ СУБТИТРЫ
+                this.subtitleParts = [];
                 
-                this.currentState = 'hello';
                 this.isPlaying = false;
                 this.audio = new Audio();
                 this.animationInterval = null;
-                this.subtitleInterval = null;
-                this.currentSubtitleIndex = -1;
-                this.hasSecondEnded = false;
+                this.hasPlayed = false; // Флаг, что первый раз уже нажали
                 
                 this.scene = null;
                 this.camera = null;
@@ -490,12 +460,19 @@
             }
             
             onButtonClick() {
-                console.log('Обработчик кнопки, состояние:', this.currentState);
+                console.log('Кнопка нажата');
                 if (this.isPlaying) {
                     console.log('Уже играет');
                     return;
                 }
-                this.startPlayback();
+                
+                if (!this.hasPlayed) {
+                    // Первый раз - играем звук
+                    this.startPlayback();
+                } else {
+                    // Уже играли - сразу переход
+                    this.playTransition();
+                }
             }
             
             startPlayback() {
@@ -505,45 +482,19 @@
                 
                 this.startMouthAnimation();
                 
-                if (this.currentState === 'thanks') {
-                    this.startSubtitles();
-                }
+                console.log('Загружаем аудио:', this.audioFile);
                 
-                const audioFile = this.audioFiles[this.currentState];
-                console.log('Загружаем аудио:', audioFile);
-                
-                this.audio.src = audioFile;
+                this.audio.src = this.audioFile;
                 this.audio.play()
-                    .then(() => console.log('Аудио играет'))
+                    .then(() => {
+                        console.log('Аудио играет');
+                        this.hasPlayed = true;
+                    })
                     .catch(e => {
                         console.error('Ошибка воспроизведения:', e);
-                        alert(`Файл ${audioFile} не найден!`);
+                        alert(`Файл ${this.audioFile} не найден!`);
                         this.stopPlayback();
                     });
-            }
-            
-            startSubtitles() {
-                if (!this.subtitles) return;
-                this.subtitles.classList.add('visible');
-                this.currentSubtitleIndex = -1;
-                
-                this.subtitleInterval = setInterval(() => {
-                    if (!this.isPlaying || !this.audio) return;
-                    
-                    const currentTime = this.audio.currentTime;
-                    
-                    for (let i = 0; i < this.subtitleParts.length; i++) {
-                        if (currentTime >= this.subtitleParts[i].start && 
-                            currentTime < this.subtitleParts[i].end) {
-                            
-                            if (i !== this.currentSubtitleIndex) {
-                                this.currentSubtitleIndex = i;
-                                this.subtitles.textContent = this.subtitleParts[i].text;
-                            }
-                            break;
-                        }
-                    }
-                }, 100);
             }
             
             startMouthAnimation() {
@@ -568,43 +519,20 @@
                 }
             }
             
-            stopSubtitles() {
-                if (this.subtitleInterval) {
-                    clearInterval(this.subtitleInterval);
-                    this.subtitleInterval = null;
-                }
-                if (this.subtitles) {
-                    this.subtitles.classList.remove('visible');
-                    this.subtitles.textContent = '';
-                }
-                this.currentSubtitleIndex = -1;
-            }
-            
             onEnded() {
                 console.log('Воспроизведение закончено');
                 this.stopMouthAnimation();
-                this.stopSubtitles();
-                
-                if (this.currentState === 'hello') {
-                    this.currentState = 'thanks';
-                    if (this.button) this.button.textContent = 'thanks';
-                } else {
-                    if (!this.hasSecondEnded) {
-                        this.hasSecondEnded = true;
-                        this.playTransition();
-                    }
-                    this.currentState = 'hello';
-                    if (this.button) this.button.textContent = 'hello';
-                }
                 
                 if (this.button) this.button.classList.remove('playing');
                 this.isPlaying = false;
+                
+                // После окончания звука сразу переходим на вторую страницу
+                this.playTransition();
             }
             
             onError(e) {
                 console.error('Ошибка аудио:', e);
                 this.stopMouthAnimation();
-                this.stopSubtitles();
                 if (this.button) this.button.classList.remove('playing');
                 this.isPlaying = false;
             }
@@ -615,7 +543,6 @@
                     this.audio.currentTime = 0;
                 }
                 this.stopMouthAnimation();
-                this.stopSubtitles();
                 if (this.button) this.button.classList.remove('playing');
                 this.isPlaying = false;
             }
@@ -712,25 +639,11 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // Нейтральное освещение
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-                this.scene.add(ambientLight);
-                
-                const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
-                frontLight.position.set(0, 1, 5);
-                this.scene.add(frontLight);
-                
-                const topLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                topLight.position.set(0, 5, 2);
-                this.scene.add(topLight);
-                
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                backLight.position.set(0, 0, -5);
-                this.scene.add(backLight);
+                // БЕЗ ОСВЕЩЕНИЯ
                 
                 // Звездочки
                 const starsGeometry = new THREE.BufferGeometry();
-                const starsCount = 300;
+                const starsCount = 200;
                 const starsPositions = new Float32Array(starsCount * 3);
                 for (let i = 0; i < starsCount * 3; i += 3) {
                     starsPositions[i] = (Math.random() - 0.5) * 30;
@@ -740,10 +653,10 @@
                 starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
                 
                 const starsMaterial = new THREE.PointsMaterial({ 
-                    color: 0xffdddd,
-                    size: 0.12,
+                    color: 0xfff0f5,
+                    size: 0.1,
                     transparent: true,
-                    opacity: 0.3
+                    opacity: 0.2
                 });
                 const stars = new THREE.Points(starsGeometry, starsMaterial);
                 this.scene.add(stars);
@@ -796,7 +709,8 @@
                 
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
                 const material = new THREE.MeshStandardMaterial({ 
-                    color: 0xffdddd,
+                    color: 0xffaaaa,
+                    emissive: 0x442222,
                     roughness: 0.5
                 });
                 const sphere = new THREE.Mesh(geometry, material);
@@ -813,7 +727,7 @@
                 sphere.add(eye2);
                 
                 const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
-                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff8888 });
+                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xaa5555 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
                 mouth.rotation.x = Math.PI / 2;
                 mouth.rotation.z = Math.PI;
