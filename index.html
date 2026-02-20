@@ -35,7 +35,6 @@
             margin: 0 auto;
         }
 
-        /* Видео на самом нижнем слое */
         .background-video {
             position: absolute;
             top: 0;
@@ -44,8 +43,8 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
-            opacity: 1; /* Полная видимость */
-            filter: none; /* Убрали затемнение */
+            opacity: 1;
+            filter: none;
             pointer-events: none;
         }
 
@@ -111,7 +110,6 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик на сцене 1 – всегда видимый */
         .skip-cross {
             position: absolute;
             top: 60px;
@@ -134,14 +132,13 @@
             color: white;
         }
 
-        /* Крестик на сцене 2 */
         .skip-cross2 {
             position: absolute;
             top: 60px;
             right: 25px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.7);
             font-family: 'Arial', sans-serif;
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 300;
             cursor: pointer;
             z-index: 10000;
@@ -149,14 +146,14 @@
             line-height: 1;
             transition: opacity 0.2s ease;
             pointer-events: auto;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .skip-cross2:hover,
         .skip-cross2:active {
-            color: rgba(255, 255, 255, 0.6);
+            color: white;
         }
 
-        /* Сцена 1: праздник (только видео и голова) */
         .fashion-page {
             width: 100%;
             height: 100%;
@@ -175,10 +172,6 @@
             pointer-events: auto;
         }
 
-        /* Текст полностью удалён */
-        /* .fashion-text, .click-hint, .loader удалены */
-
-        /* Сцена 2: хоррор (без изменений) */
         .horror-container {
             position: relative;
             width: 100%;
@@ -279,34 +272,26 @@
     <div class="crt-effect" id="crtEffect"></div>
 
     <div class="game-container">
-        <!-- ВИДЕО НА ФОНЕ -->
         <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
             <source src="fashion-bg.mp4" type="video/mp4">
         </video>
 
-        <!-- СЦЕНА 1: ПРАЗДНИК (только видео и голова) -->
         <div class="page" id="page1">
             <div class="skip-cross" id="skipButton">✕</div>
-            
             <div class="fashion-page">
                 <div id="canvas-container"></div>
-                <!-- Весь текст удалён -->
             </div>
         </div>
 
-        <!-- СЦЕНА 2: ХОРРОР -->
         <div class="page" id="page2">
             <div class="skip-cross2" id="skipButton2">✕</div>
-            
             <div class="horror-container">
                 <img src="mouth-closed.png" alt="" id="characterImage">
                 <div class="vignette"></div>
             </div>
-            
             <div class="subtitles-container">
                 <div class="subtitles" id="subtitles"></div>
             </div>
-            
             <div class="bottom-area">
                 <button class="action-button" id="actionButton">hello</button>
             </div>
@@ -331,9 +316,7 @@
                 console.log('Конструктор запущен');
                 
                 // Элементы сцены 1
-                this.loader = document.getElementById('modelLoader'); // больше не используется, но оставим
                 this.skipButton = document.getElementById('skipButton');
-                this.clickHint = document.getElementById('clickHint'); // удалён, но ссылка остаётся
                 
                 // Элементы сцены 2
                 this.image = document.getElementById('characterImage');
@@ -405,9 +388,9 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
-                // Для вращения
+                // Для вращения – начинаем с 0
                 this.targetRotationSpeed = 0.0038;
-                this.currentRotationSpeed = 0.0038;
+                this.currentRotationSpeed = 0; // теперь 0
                 this.rotationAnimation = null;
                 
                 this.raycaster = new THREE.Raycaster();
@@ -694,9 +677,8 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = null; // прозрачный
+                this.scene.background = null;
                 
-                // Камера – достаточное расстояние
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 12);
                 
@@ -716,7 +698,7 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // Освещение (мягкое, без затенения)
+                // Мягкое освещение
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
                 this.scene.add(ambientLight);
                 
@@ -728,7 +710,6 @@
                 backLight.position.set(0, 1, -5);
                 this.scene.add(backLight);
                 
-                // Загружаем модель
                 const loader = new GLTFLoader();
                 
                 loader.load(
@@ -737,7 +718,6 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // Центрируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
@@ -745,32 +725,23 @@
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         
-                        // УМЕНЬШАЕМ В 2 РАЗА (было 4.5, теперь 2.25)
-                        const scale = 2.25 / maxDim; 
+                        const scale = 2.25 / maxDim; // уменьшена вдвое
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
-                        // ПОДНИМАЕМ НА 20% (примерно 0.4 по Y, подбирается)
-                        this.model.position.y += 0.4; 
+                        // Поднимаем ещё на 20% (было 0.4, стало 0.6)
+                        this.model.position.y += 0.6; 
                         
                         this.scene.add(this.model);
-                        
-                        // Скрываем загрузчик (если есть)
-                        if (this.loader) this.loader.style.display = 'none';
                         
                         console.log('Модель добавлена. Масштаб:', scale);
                     },
                     (xhr) => {
-                        // Прогресс загрузки – можно игнорировать, т.к. текст убран
-                        // но оставим для отладки
-                        if (xhr.total) {
-                            const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                            console.log(`Загрузка модели: ${percent}%`);
-                        }
+                        // прогресс загрузки (необязательно)
                     },
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
-                        // Если модель не загрузилась, создаём заглушку
+                        // Если модель не загрузилась, создаём заглушку, чтобы хоть что-то было
                         this.createPlaceholderHead();
                     }
                 );
@@ -782,26 +753,19 @@
             
             createPlaceholderHead() {
                 console.log('Создаем заглушку');
-                
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
-                const material = new THREE.MeshStandardMaterial({ 
-                    color: 0xffaaaa,
-                    emissive: 0x442222,
-                    roughness: 0.5
-                });
+                const material = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
                 const sphere = new THREE.Mesh(geometry, material);
-                
+                // Добавим глазки для наглядности
                 const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
                 const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-                
                 const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
                 eye1.position.set(-0.4, 0.3, 0.85);
                 sphere.add(eye1);
-                
                 const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
                 eye2.position.set(0.4, 0.3, 0.85);
                 sphere.add(eye2);
-                
+                // Ротик
                 const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
                 const mouthMat = new THREE.MeshStandardMaterial({ color: 0xaa5555 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -810,21 +774,24 @@
                 mouth.position.set(0, -0.2, 0.85);
                 sphere.add(mouth);
                 
+                sphere.scale.set(2.25, 2.25, 2.25);
+                sphere.position.y = 0.6;
+                
                 this.model = sphere;
                 this.scene.add(this.model);
-                this.originalScale = 1;
-                
-                if (this.loader) this.loader.style.display = 'none';
+                this.originalScale = 2.25;
             }
             
             animate() {
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
+                    // Вращение только если скорость > 0 (т.е. после клика)
                     this.model.rotation.y += this.currentRotationSpeed;
                     
                     const time = this.clock.getElapsedTime();
-                    this.model.position.y = 0.4 + Math.sin(time * 1.5) * 0.15; // плавание вокруг поднятой позиции
+                    // Покачивание вверх-вниз вокруг поднятой позиции
+                    this.model.position.y = 0.6 + Math.sin(time * 1.5) * 0.15;
                 }
                 
                 if (this.renderer && this.scene && this.camera) {
