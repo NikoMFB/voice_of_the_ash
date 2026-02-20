@@ -35,6 +35,7 @@
             margin: 0 auto;
         }
 
+        /* Видео только под первой сценой */
         .background-video {
             position: absolute;
             top: 0;
@@ -72,6 +73,8 @@
             opacity: 0;
             z-index: 1;
             pointer-events: none;
+            /* ВРЕМЕННО: красный фон для проверки */
+            /* background: rgba(255, 0, 0, 0.5); */
         }
 
         #page2.visible {
@@ -110,48 +113,73 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
+        /* Крестик на сцене 1 – улучшенная видимость */
         .skip-cross {
             position: absolute;
             top: 60px;
             right: 25px;
-            color: rgba(255, 255, 255, 0.9);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
             font-family: 'Arial', sans-serif;
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 300;
             cursor: pointer;
-            z-index: 10000;
+            z-index: 2147483647; /* максимальный */
             user-select: none;
             line-height: 1;
-            transition: opacity 0.2s ease;
+            border-radius: 50%;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
             pointer-events: auto;
-            text-shadow: 0 0 15px rgba(0,0,0,0.7);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .skip-cross:hover,
         .skip-cross:active {
+            background: rgba(0, 0, 0, 0.7);
             color: white;
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.1);
         }
 
+        /* Крестик на сцене 2 */
         .skip-cross2 {
             position: absolute;
             top: 60px;
             right: 25px;
-            color: rgba(255, 255, 255, 0.7);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.8);
             font-family: 'Arial', sans-serif;
-            font-size: 42px;
+            font-size: 36px;
             font-weight: 300;
             cursor: pointer;
-            z-index: 10000;
+            z-index: 2147483647;
             user-select: none;
             line-height: 1;
-            transition: opacity 0.2s ease;
+            border-radius: 50%;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
             pointer-events: auto;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .skip-cross2:hover,
         .skip-cross2:active {
+            background: rgba(0, 0, 0, 0.6);
             color: white;
+            border-color: rgba(255,255,255,0.5);
+            transform: scale(1.1);
         }
 
         .fashion-page {
@@ -176,7 +204,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            background: transparent;
+            background: #000; /* черный фон, чтобы видео не просвечивало */
         }
 
         #characterImage {
@@ -286,7 +314,7 @@
         <div class="page" id="page2">
             <div class="skip-cross2" id="skipButton2">✕</div>
             <div class="horror-container">
-                <img src="mouth-closed.png" alt="" id="characterImage">
+                <img src="mouth-closed.png" alt="" id="characterImage" onerror="this.style.display='none'; console.error('mouth-closed.png not found')">
                 <div class="vignette"></div>
             </div>
             <div class="subtitles-container">
@@ -317,6 +345,7 @@
                 
                 // Элементы сцены 1
                 this.skipButton = document.getElementById('skipButton');
+                this.bgVideo = document.getElementById('bgVideo');
                 
                 // Элементы сцены 2
                 this.image = document.getElementById('characterImage');
@@ -390,7 +419,7 @@
                 
                 // Для вращения – начинаем с 0
                 this.targetRotationSpeed = 0.0038;
-                this.currentRotationSpeed = 0; // теперь 0
+                this.currentRotationSpeed = 0;
                 this.rotationAnimation = null;
                 
                 this.raycaster = new THREE.Raycaster();
@@ -698,7 +727,6 @@
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // Мягкое освещение
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
                 this.scene.add(ambientLight);
                 
@@ -725,12 +753,11 @@
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         
-                        const scale = 2.25 / maxDim; // уменьшена вдвое
+                        const scale = 2.25 / maxDim;
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
-                        // Поднимаем ещё на 20% (было 0.4, стало 0.6)
-                        this.model.position.y += 0.8; 
+                        this.model.position.y += 0.6;
                         
                         this.scene.add(this.model);
                         
@@ -741,7 +768,6 @@
                     },
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
-                        // Если модель не загрузилась, создаём заглушку, чтобы хоть что-то было
                         this.createPlaceholderHead();
                     }
                 );
@@ -786,11 +812,9 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // Вращение только если скорость > 0 (т.е. после клика)
                     this.model.rotation.y += this.currentRotationSpeed;
                     
                     const time = this.clock.getElapsedTime();
-                    // Покачивание вверх-вниз вокруг поднятой позиции
                     this.model.position.y = 0.6 + Math.sin(time * 1.5) * 0.15;
                 }
                 
@@ -812,6 +836,12 @@
                 console.log('Запуск перехода, направление:', this.transitionDirection);
                 this.crtEffect.classList.add('active');
                 
+                // Останавливаем видео при переходе в любую сторону
+                if (this.bgVideo) {
+                    this.bgVideo.pause();
+                    console.log('Видео остановлено');
+                }
+                
                 setTimeout(() => {
                     if (this.transitionDirection === 'toHorror') {
                         console.log('Переключение на сцену 2');
@@ -827,6 +857,11 @@
                         console.log('Возврат на сцену 1');
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
+                        
+                        // Запускаем видео обратно?
+                        if (this.bgVideo) {
+                            this.bgVideo.play().catch(e => console.log('Не удалось запустить видео'));
+                        }
                     }
                 }, 500);
                 
