@@ -73,7 +73,7 @@
             opacity: 0;
             z-index: 1;
             pointer-events: none;
-            background: #000; /* чёрный фон для второй сцены */
+            background: #000;
         }
 
         #page2.visible {
@@ -112,20 +112,20 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик на сцене 1 */
+        /* Крестик на сцене 1 – без рамки, повышенная прозрачность */
         .skip-cross {
             position: absolute;
             top: 60px;
             right: 20px;
             width: 50px;
             height: 50px;
-            background-color: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background-color: rgba(0, 0, 0, 0.3); /* прозрачность увеличена */
+            border: none; /* рамка убрана */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 36px;
             font-weight: 300;
             cursor: pointer;
@@ -139,20 +139,20 @@
 
         .skip-cross:hover,
         .skip-cross:active {
-            background-color: rgba(0, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
             transform: scale(1.1);
         }
 
-        /* Крестик на сцене 2 */
+        /* Крестик на сцене 2 – без рамки, повышенная прозрачность */
         .skip-cross2 {
             position: absolute;
             top: 60px;
             right: 20px;
             width: 50px;
             height: 50px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.3);
+            border: none;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -170,8 +170,7 @@
 
         .skip-cross2:hover,
         .skip-cross2:active {
-            background-color: rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.6);
+            background-color: rgba(0, 0, 0, 0.5);
             color: white;
             transform: scale(1.1);
         }
@@ -195,7 +194,7 @@
             pointer-events: auto;
         }
 
-        /* ===== СЦЕНА 2: ХОРРОР (ПОЛНЫЙ ФУНКЦИОНАЛ) ===== */
+        /* ===== СЦЕНА 2: ХОРРОР ===== */
         .horror-container {
             position: relative;
             width: 100%;
@@ -300,7 +299,7 @@
             <source src="fashion-bg.mp4" type="video/mp4">
         </video>
 
-        <!-- СЦЕНА 1: ПРАЗДНИК (ГОЛОВА + ВИДЕО) -->
+        <!-- СЦЕНА 1: ПРАЗДНИК -->
         <div class="page" id="page1">
             <div class="skip-cross" id="skipButton">✕</div>
             <div class="fashion-page">
@@ -308,7 +307,7 @@
             </div>
         </div>
 
-        <!-- СЦЕНА 2: ХОРРОР (ПОЛНОСТЬЮ ВОССТАНОВЛЕНА) -->
+        <!-- СЦЕНА 2: ХОРРОР -->
         <div class="page" id="page2">
             <div class="skip-cross2" id="skipButton2">✕</div>
             <div class="horror-container">
@@ -356,20 +355,20 @@
                 this.page2 = document.getElementById('page2');
                 this.crtEffect = document.getElementById('crtEffect');
                 
-                // ===== МУЗЫКА ДЛЯ ПЕРВОЙ СЦЕНЫ (управляется кликом по голове) =====
+                // Музыка для первой сцены
                 this.bgMusic = new Audio();
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.5;
                 this.isMusicPlaying = false;
                 this.bgMusic.src = 'birthday-music.mp3';
                 
-                // ===== АУДИО ДЛЯ ВТОРОЙ СЦЕНЫ =====
+                // Аудио для второй сцены
                 this.audioFiles = {
                     hello: 'voice1.mp3',
                     thanks: 'voice2.mp3'
                 };
                 
-                // ===== СУБТИТРЫ ДЛЯ ВТОРОЙ ЗАПИСИ (voice2) =====
+                // Субтитры для второй записи
                 this.subtitleParts = [
                     { text: "Соединение прервано.", start: 0, end: 2.5 },
                     { text: "Мне жаль, что я прерываю вас, Мелина,", start: 2.5, end: 5.5 },
@@ -398,13 +397,13 @@
                     { text: "Здесь ваша история заканчивается.", start: 57, end: 60 }
                 ];
                 
-                this.currentState = 'hello';  // 'hello' или 'thanks'
-                this.isPlaying = false;       // играет ли аудио во второй сцене
+                this.currentState = 'hello';
+                this.isPlaying = false;
                 this.audio = new Audio();
                 this.animationInterval = null;
                 this.subtitleInterval = null;
                 this.currentSubtitleIndex = -1;
-                this.transitionDirection = 'toHorror'; // направление перехода
+                this.transitionDirection = 'toHorror';
                 
                 // 3D переменные
                 this.scene = null;
@@ -415,7 +414,6 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
-                // Для вращения (начинается с 0)
                 this.targetRotationSpeed = 0.0038;
                 this.currentRotationSpeed = 0;
                 this.rotationAnimation = null;
@@ -429,7 +427,6 @@
             init() {
                 console.log('Инициализация...');
                 
-                // Крестик сцены 1 -> переход на сцену 2
                 if (this.skipButton) {
                     this.skipButton.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -440,7 +437,6 @@
                     });
                 }
                 
-                // Крестик сцены 2 -> возврат на сцену 1
                 if (this.skipButton2) {
                     this.skipButton2.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -451,7 +447,6 @@
                     });
                 }
                 
-                // Кнопка на второй сцене (hello/thanks)
                 if (this.button) {
                     this.button.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -469,7 +464,7 @@
                 }, 100);
             }
             
-            // ===== УПРАВЛЕНИЕ МУЗЫКОЙ И ВРАЩЕНИЕМ (ПЕРВАЯ СЦЕНА) =====
+            // Плавное изменение скорости вращения
             animateRotationSpeed(targetSpeed) {
                 if (this.rotationAnimation) {
                     cancelAnimationFrame(this.rotationAnimation);
@@ -496,6 +491,7 @@
                 this.rotationAnimation = requestAnimationFrame(animate);
             }
             
+            // Включение/выключение музыки и вращения по клику на голову
             toggleMusicAndRotation() {
                 if (!this.model) return;
                 
@@ -519,6 +515,7 @@
                 }
             }
             
+            // Анимация пульсации при клике (плавное возвращение)
             animateHeadClick() {
                 if (this.isAnimating || !this.model) return;
                 
@@ -528,6 +525,8 @@
                 let progress = 0;
                 const duration = 400;
                 const startTime = performance.now();
+                
+                const currentY = this.model.position.y; // запоминаем текущую Y
                 
                 const animate = (currentTime) => {
                     const elapsed = currentTime - startTime;
@@ -543,6 +542,9 @@
                         this.model.scale.set(scale, scale, scale);
                     }
                     
+                    // Удерживаем позицию Y, чтобы не было рывка
+                    this.model.position.y = currentY;
+                    
                     if (progress < 1) {
                         requestAnimationFrame(animate);
                     } else {
@@ -554,7 +556,7 @@
                 requestAnimationFrame(animate);
             }
             
-            // ===== ОБРАБОТКА КЛИКОВ ПО 3D МОДЕЛИ =====
+            // Обработчик клика по 3D-модели
             onCanvasClick(event) {
                 if (!this.model || this.isAnimating) return;
                 
@@ -572,7 +574,7 @@
                 }
             }
             
-            // ===== ВТОРАЯ СЦЕНА: ЛОГИКА КНОПКИ =====
+            // ===== ВТОРАЯ СЦЕНА =====
             onButtonClick() {
                 console.log('Кнопка в хорроре, состояние:', this.currentState);
                 if (this.isPlaying) {
@@ -664,12 +666,33 @@
                 this.currentSubtitleIndex = -1;
             }
             
+            // Сброс второй сцены в исходное состояние (при возврате на первую сцену)
+            resetScene2() {
+                // Останавливаем аудио, если играет
+                if (this.isPlaying) {
+                    this.audio.pause();
+                    this.audio.currentTime = 0;
+                    this.stopMouthAnimation();
+                    this.stopSubtitles();
+                    if (this.button) this.button.classList.remove('playing');
+                    this.isPlaying = false;
+                }
+                // Возвращаем кнопку в состояние hello
+                if (this.currentState !== 'hello') {
+                    this.currentState = 'hello';
+                    if (this.button) this.button.textContent = 'hello';
+                }
+                // Убеждаемся, что картинка с закрытым ртом
+                if (this.image) {
+                    this.image.src = 'mouth-closed.png';
+                }
+            }
+            
             onEnded() {
                 console.log('Воспроизведение закончено');
                 this.stopMouthAnimation();
                 this.stopSubtitles();
                 
-                // Переключаем состояние кнопки
                 if (this.currentState === 'hello') {
                     this.currentState = 'thanks';
                     if (this.button) this.button.textContent = 'thanks';
@@ -701,7 +724,7 @@
                 this.isPlaying = false;
             }
             
-            // ===== 3D ИНИЦИАЛИЗАЦИЯ (ПЕРВАЯ СЦЕНА) =====
+            // ===== 3D ИНИЦИАЛИЗАЦИЯ =====
             init3D() {
                 console.log('Инициализация 3D');
                 const container = document.getElementById('canvas-container');
@@ -712,7 +735,7 @@
                 }
                 
                 this.scene = new THREE.Scene();
-                this.scene.background = null; // прозрачный фон
+                this.scene.background = null;
                 
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 12);
@@ -754,7 +777,6 @@
                         console.log('Модель загружена!');
                         this.model = gltf.scene;
                         
-                        // Центрируем
                         const box = new THREE.Box3().setFromObject(this.model);
                         const center = box.getCenter(new THREE.Vector3());
                         this.model.position.sub(center);
@@ -762,12 +784,12 @@
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         
-                        const scale = 2.25 / maxDim; // уменьшена вдвое
+                        const scale = 2.25 / maxDim;
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
-                        // ПОДНИМАЕМ С 0.6 ДО 0.9
-                        this.model.position.y += 0.9; 
+                        // Подняли на 0.9
+                        this.model.position.y += 0.9;
                         
                         this.scene.add(this.model);
                         
@@ -791,7 +813,6 @@
                 const material = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
                 const sphere = new THREE.Mesh(geometry, material);
                 
-                // Глазки
                 const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
                 const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
                 const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
@@ -801,7 +822,6 @@
                 eye2.position.set(0.4, 0.3, 0.85);
                 sphere.add(eye2);
                 
-                // Ротик
                 const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
                 const mouthMat = new THREE.MeshStandardMaterial({ color: 0xaa5555 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -811,7 +831,7 @@
                 sphere.add(mouth);
                 
                 sphere.scale.set(2.25, 2.25, 2.25);
-                sphere.position.y = 0.9; // тоже поднимаем
+                sphere.position.y = 0.9;
                 
                 this.model = sphere;
                 this.scene.add(this.model);
@@ -825,7 +845,6 @@
                     this.model.rotation.y += this.currentRotationSpeed;
                     
                     const time = this.clock.getElapsedTime();
-                    // Покачивание вокруг поднятой позиции (0.9)
                     this.model.position.y = 0.9 + Math.sin(time * 1.5) * 0.15;
                 }
                 
@@ -849,10 +868,9 @@
                 
                 this.crtEffect.classList.add('active');
                 
-                // Останавливаем видео при любом переходе
+                // Останавливаем видео в любом случае
                 if (this.bgVideo) {
                     this.bgVideo.pause();
-                    console.log('Видео остановлено');
                 }
                 
                 setTimeout(() => {
@@ -861,11 +879,12 @@
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
                         
-                        // Принудительно задаём стили для надёжности
+                        // Принудительные стили
                         this.page2.style.opacity = '1';
                         this.page2.style.zIndex = '3';
                         this.page2.style.pointerEvents = 'auto';
                         
+                        // Останавливаем музыку первой сцены, если играла
                         if (this.isMusicPlaying) {
                             this.bgMusic.pause();
                             this.isMusicPlaying = false;
@@ -873,10 +892,14 @@
                         }
                     } else {
                         console.log('Возврат на сцену 1');
+                        
+                        // Сброс второй сцены (остановка аудио, анимаций, возврат к hello)
+                        this.resetScene2();
+                        
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
                         
-                        // Принудительно возвращаем стили
+                        // Принудительные стили
                         this.page1.style.opacity = '1';
                         this.page1.style.zIndex = '2';
                         this.page1.style.pointerEvents = 'auto';
