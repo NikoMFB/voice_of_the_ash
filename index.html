@@ -763,94 +763,96 @@
                 }
             }
             
-            init3D() {
-                console.log('Инициализация 3D');
-                const container = document.getElementById('canvas-container');
-                
-                if (!container) {
-                    console.error('Canvas container не найден!');
-                    return;
-                }
-                
-                this.scene = new THREE.Scene();
-                this.scene.background = null; // Прозрачный фон для видео
-                
-                // КАМЕРА - оптимальное расстояние
-                this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-                this.camera.position.set(0, 0, 12);
-                
-                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                this.renderer.setSize(container.clientWidth, container.clientHeight);
-                this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.renderer.setClearColor(0x000000, 0); // Прозрачный фон
-                
-                this.renderer.domElement.style.position = 'absolute';
-                this.renderer.domElement.style.top = '0';
-                this.renderer.domElement.style.left = '0';
-                this.renderer.domElement.style.zIndex = '100';
-                this.renderer.domElement.style.pointerEvents = 'auto';
-                
-                container.appendChild(this.renderer.domElement);
-                
-                this.renderer.domElement.style.cursor = 'pointer';
-                this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
-                
-                // МЯГКОЕ ОСВЕЩЕНИЕ
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-                this.scene.add(ambientLight);
-                
-                const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
-                frontLight.position.set(0, 2, 5);
-                this.scene.add(frontLight);
-                
-                const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                backLight.position.set(0, 1, -5);
-                this.scene.add(backLight);
-                
-                // Загружаем модель
-                const loader = new GLTFLoader();
-                
-                loader.load(
-                    'anime-head.glb',
-                    (gltf) => {
-                        console.log('Модель загружена!');
-                        this.model = gltf.scene;
-                        
-                        // Центрируем
-                        const box = new THREE.Box3().setFromObject(this.model);
-                        const center = box.getCenter(new THREE.Vector3());
-                        this.model.position.sub(center);
-                        
-                        // Масштабируем
-                        const size = box.getSize(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2.0 / maxDim;
-                        this.model.scale.set(scale, scale, scale);
-                        this.originalScale = scale;
-                        
-                        this.scene.add(this.model);
-                        
-                        if (this.loader) {
-                            this.loader.style.display = 'none';
-                        }
-                        
-                        console.log('Модель добавлена. Масштаб:', scale);
-                    },
-                    (xhr) => {
-                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                        if (this.loader) {
-                            this.loader.textContent = `✨ ${percent}% ✨`;
-                        }
-                    },
-                    (error) => {
-                        console.error('Ошибка загрузки модели:', error);
-                        if (this.loader) {
-                            this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
-                        }
-                        this.createPlaceholderHead();
-                    }
-                );
-            }
+           init3D() {
+    console.log('Инициализация 3D');
+    const container = document.getElementById('canvas-container');
+    if (!container) { console.error('Canvas container не найден!'); return; }
+
+    this.scene = new THREE.Scene();
+    this.scene.background = null; // прозрачный фон
+
+    // КАМЕРА – отодвинем подальше для обзора
+    this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    this.camera.position.set(0, 0, 20); // было 12, стало 20
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setSize(container.clientWidth, container.clientHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.domElement.style.position = 'absolute';
+    this.renderer.domElement.style.top = '0';
+    this.renderer.domElement.style.left = '0';
+    this.renderer.domElement.style.zIndex = '100';
+    this.renderer.domElement.style.pointerEvents = 'auto';
+    container.appendChild(this.renderer.domElement);
+    this.renderer.domElement.style.cursor = 'pointer';
+    this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
+
+    // --- ВСПОМОГАТЕЛЬНЫЙ ОБЪЕКТ: яркая красная сфера в центре ---
+    const debugSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 32, 32),
+        new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x330000 })
+    );
+    this.scene.add(debugSphere);
+    console.log('Добавлена отладочная сфера');
+
+    // Освещение (усилим, чтобы модель точно была видна)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // ярче
+    this.scene.add(ambientLight);
+
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    frontLight.position.set(0, 2, 5);
+    this.scene.add(frontLight);
+
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    backLight.position.set(0, 1, -5);
+    this.scene.add(backLight);
+
+    // Загружаем модель
+    const loader = new GLTFLoader();
+    loader.load(
+        'anime-head.glb',
+        (gltf) => {
+            console.log('Модель загружена!');
+            this.model = gltf.scene;
+
+            // Центрируем и масштабируем
+            const box = new THREE.Box3().setFromObject(this.model);
+            const center = box.getCenter(new THREE.Vector3());
+            this.model.position.sub(center);
+
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            // Уменьшим масштаб, чтобы точно видеть всю модель
+            const scale = 1.5 / maxDim; // было 2.0, стало 1.5
+            this.model.scale.set(scale, scale, scale);
+            this.originalScale = scale;
+
+            this.scene.add(this.model);
+            console.log('Модель добавлена. Масштаб:', scale, 'Размеры:', size);
+
+            // Убираем загрузчик
+            if (this.loader) this.loader.style.display = 'none';
+
+            // Через 2 секунды уберём отладочную сферу (чтобы не мешала)
+            setTimeout(() => {
+                this.scene.remove(debugSphere);
+            }, 2000);
+        },
+        (xhr) => {
+            const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+            if (this.loader) this.loader.textContent = `✨ ${percent}% ✨`;
+        },
+        (error) => {
+            console.error('Ошибка загрузки модели:', error);
+            if (this.loader) this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
+            this.createPlaceholderHead();
+        }
+    );
+
+    this.animate();
+    window.addEventListener('resize', () => this.onWindowResize());
+}
             
             createPlaceholderHead() {
                 console.log('Создаем заглушку');
