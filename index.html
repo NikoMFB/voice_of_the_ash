@@ -35,7 +35,6 @@
             margin: 0 auto;
         }
 
-        /* Видео только под первой сценой */
         .background-video {
             position: absolute;
             top: 0;
@@ -73,7 +72,13 @@
             opacity: 0;
             z-index: 1;
             pointer-events: none;
-            background: #000; /* чёрный фон, чтобы видео не мешало */
+            background: #ff0000; /* Ярко-красный фон */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-align: center;
         }
 
         #page2.visible {
@@ -112,7 +117,6 @@
             100% { opacity: 0; transform: scale(0); }
         }
 
-        /* Крестик на сцене 1 – переписан заново */
         .skip-cross {
             position: absolute;
             top: 60px;
@@ -129,7 +133,7 @@
             font-size: 36px;
             font-weight: 300;
             cursor: pointer;
-            z-index: 2147483647; /* максимальный */
+            z-index: 2147483647;
             user-select: none;
             backdrop-filter: blur(4px);
             transition: all 0.2s ease;
@@ -137,14 +141,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .skip-cross:hover,
-        .skip-cross:active {
-            background-color: rgba(0, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
-            transform: scale(1.1);
-        }
-
-        /* Крестик на сцене 2 */
         .skip-cross2 {
             position: absolute;
             top: 60px;
@@ -168,14 +164,6 @@
             pointer-events: auto;
         }
 
-        .skip-cross2:hover,
-        .skip-cross2:active {
-            background-color: rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.6);
-            color: white;
-            transform: scale(1.1);
-        }
-
         .fashion-page {
             width: 100%;
             height: 100%;
@@ -194,11 +182,9 @@
             pointer-events: auto;
         }
 
-        /* Вторая сцена – упрощена для теста */
         .test-scene {
             width: 100%;
             height: 100%;
-            background: #ff0000; /* ярко-красный, чтобы сразу было видно */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -206,97 +192,8 @@
             color: white;
             font-size: 24px;
             text-align: center;
+            background: #ff0000;
         }
-
-        /* Оригинальные стили для второй сцены (закомментированы) */
-        /*
-        .horror-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-        #characterImage {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            position: relative;
-            z-index: 1;
-        }
-        .vignette {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, 
-                        transparent 40%, 
-                        rgba(0, 0, 0, 0.5) 100%);
-            pointer-events: none;
-            z-index: 2;
-        }
-        .subtitles-container {
-            position: absolute;
-            bottom: 180px;
-            left: 0;
-            width: 100%;
-            padding: 0 25px;
-            z-index: 20;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-        }
-        .subtitles {
-            color: #f0e68c;
-            font-family: 'Courier New', 'Courier', monospace;
-            font-size: 18px;
-            line-height: 1.6;
-            text-align: center;
-            text-shadow: 2px 2px 0px #000;
-            letter-spacing: 1px;
-            max-width: 100%;
-            width: 100%;
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            text-transform: uppercase;
-        }
-        .subtitles.visible {
-            opacity: 1;
-        }
-        .bottom-area {
-            position: absolute;
-            bottom: 70px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            z-index: 30;
-            pointer-events: none;
-        }
-        .action-button {
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 240, 0.25);
-            color: rgba(255, 255, 240, 0.9);
-            font-family: 'Courier New', 'Courier', monospace;
-            font-size: 22px;
-            letter-spacing: 3px;
-            padding: 12px 40px;
-            cursor: pointer;
-            pointer-events: auto;
-            backdrop-filter: blur(2px);
-            transition: all 0.2s ease;
-            text-transform: lowercase;
-            min-width: 180px;
-            text-align: center;
-            position: relative;
-            z-index: 31;
-        }
-        .action-button.playing {
-            background: rgba(255, 255, 200, 0.2);
-            border: 1px solid rgba(255, 255, 200, 0.4);
-        }
-        */
     </style>
 </head>
 <body>
@@ -307,7 +204,6 @@
             <source src="fashion-bg.mp4" type="video/mp4">
         </video>
 
-        <!-- СЦЕНА 1: ПРАЗДНИК -->
         <div class="page" id="page1">
             <div class="skip-cross" id="skipButton">✕</div>
             <div class="fashion-page">
@@ -315,7 +211,6 @@
             </div>
         </div>
 
-        <!-- СЦЕНА 2: УПРОЩЁННАЯ ТЕСТОВАЯ -->
         <div class="page" id="page2">
             <div class="skip-cross2" id="skipButton2">✕</div>
             <div class="test-scene">
@@ -342,41 +237,25 @@
             constructor() {
                 console.log('Конструктор запущен');
                 
-                // Элементы сцены 1
                 this.skipButton = document.getElementById('skipButton');
                 this.bgVideo = document.getElementById('bgVideo');
-                
-                // Элементы сцены 2
                 this.skipButton2 = document.getElementById('skipButton2');
-                // this.image = document.getElementById('characterImage'); // закомментировано
-                // this.button = document.getElementById('actionButton');
-                // this.subtitles = document.getElementById('subtitles');
                 
-                // Страницы
                 this.page1 = document.getElementById('page1');
                 this.page2 = document.getElementById('page2');
                 this.crtEffect = document.getElementById('crtEffect');
                 
-                // ===== МУЗЫКА =====
                 this.bgMusic = new Audio();
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.5;
                 this.isMusicPlaying = false;
                 this.bgMusic.src = 'birthday-music.mp3';
                 
-                // Аудио для второй сцены (пока не используются)
-                // this.audioFiles = { hello: 'voice1.mp3', thanks: 'voice2.mp3' };
-                // this.subtitleParts = [ ... ]; // пока не нужны
-                
                 this.currentState = 'hello';
                 this.isPlaying = false;
                 this.audio = new Audio();
-                this.animationInterval = null;
-                this.subtitleInterval = null;
-                this.currentSubtitleIndex = -1;
                 this.transitionDirection = 'toHorror';
                 
-                // 3D переменные
                 this.scene = null;
                 this.camera = null;
                 this.renderer = null;
@@ -385,7 +264,6 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
-                // Для вращения – начинаем с 0
                 this.targetRotationSpeed = 0.0038;
                 this.currentRotationSpeed = 0;
                 this.rotationAnimation = null;
@@ -418,10 +296,6 @@
                         this.playTransition();
                     });
                 }
-                
-                // Временные обработчии для теста (можно убрать потом)
-                // this.audio.addEventListener('ended', () => this.onEnded());
-                // this.audio.addEventListener('error', (e) => this.onError(e));
                 
                 setTimeout(() => {
                     this.init3D();
@@ -512,17 +386,6 @@
                 requestAnimationFrame(animate);
             }
             
-            // Временные заглушки для методов, которые могут вызываться (пока не нужны)
-            onButtonClick() {}
-            startPlayback() {}
-            startSubtitles() {}
-            startMouthAnimation() {}
-            stopMouthAnimation() {}
-            stopSubtitles() {}
-            onEnded() {}
-            onError(e) { console.error('Ошибка аудио:', e); }
-            stopPlayback() {}
-            
             onCanvasClick(event) {
                 if (!this.model || this.isAnimating) return;
                 
@@ -601,15 +464,13 @@
                         this.model.scale.set(scale, scale, scale);
                         this.originalScale = scale;
                         
-                        this.model.position.y += 1;
+                        this.model.position.y += 0.6;
                         
                         this.scene.add(this.model);
                         
                         console.log('Модель добавлена. Масштаб:', scale);
                     },
-                    (xhr) => {
-                        // прогресс загрузки (необязательно)
-                    },
+                    (xhr) => {},
                     (error) => {
                         console.error('Ошибка загрузки модели:', error);
                         this.createPlaceholderHead();
@@ -626,7 +487,7 @@
                 const geometry = new THREE.SphereGeometry(1, 32, 32);
                 const material = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
                 const sphere = new THREE.Mesh(geometry, material);
-                // Добавим глазки для наглядности
+                
                 const eyeGeo = new THREE.SphereGeometry(0.2, 16, 16);
                 const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
                 const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
@@ -635,7 +496,7 @@
                 const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
                 eye2.position.set(0.4, 0.3, 0.85);
                 sphere.add(eye2);
-                // Ротик
+                
                 const mouthGeo = new THREE.TorusGeometry(0.2, 0.05, 8, 24, Math.PI);
                 const mouthMat = new THREE.MeshStandardMaterial({ color: 0xaa5555 });
                 const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -678,19 +539,30 @@
             
             playTransition() {
                 console.log('Запуск перехода, направление:', this.transitionDirection);
+                
+                // Диагностика
+                alert('Шаг 1: переход запущен');
+                
                 this.crtEffect.classList.add('active');
                 
-                // Останавливаем видео при переходе в любую сторону
                 if (this.bgVideo) {
                     this.bgVideo.pause();
                     console.log('Видео остановлено');
                 }
                 
                 setTimeout(() => {
+                    alert('Шаг 2: переключение страниц');
+                    
                     if (this.transitionDirection === 'toHorror') {
                         console.log('Переключение на сцену 2');
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
+                        
+                        // Принудительно задаём стили
+                        this.page2.style.backgroundColor = 'red';
+                        this.page2.style.opacity = '1';
+                        this.page2.style.zIndex = '3';
+                        this.page2.style.pointerEvents = 'auto';
                         
                         if (this.isMusicPlaying) {
                             this.bgMusic.pause();
@@ -702,11 +574,12 @@
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
                         
-                        // Запускаем видео обратно (опционально)
                         if (this.bgVideo) {
                             this.bgVideo.play().catch(e => console.log('Не удалось запустить видео'));
                         }
                     }
+                    
+                    alert('Шаг 3: классы добавлены');
                 }, 500);
                 
                 setTimeout(() => {
