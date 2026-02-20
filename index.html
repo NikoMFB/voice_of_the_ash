@@ -176,7 +176,7 @@
             pointer-events: none;
         }
 
-        /* КОНТЕЙНЕР ДЛЯ 3D - ПОВЕРХ ВСЕГО */
+        /* КОНТЕЙНЕР ДЛЯ 3D */
         #canvas-container {
             width: 100%;
             height: 100%;
@@ -360,12 +360,10 @@
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ (раскомментируй когда загрузишь) -->
+                <!-- ВИДЕО НА ФОНЕ -->
                 <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
-                </video> 
-                
-               
+                </video>
                 
                 <div class="overlay"></div>
                 
@@ -411,6 +409,7 @@
 
     <script type="module">
         import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         class BirthdayParty {
             constructor() {
@@ -439,7 +438,7 @@
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.5;
                 this.isMusicPlaying = false;
-                this.bgMusic.src = 'birthday-music.mp3'; // Имя файла как просили
+                this.bgMusic.src = 'birthday-music.mp3';
                 
                 // Аудио файлы для второй сцены
                 this.audioFiles = {
@@ -552,13 +551,6 @@
                     this.init3D();
                 }, 100);
                 
-                // Скрываем загрузчик через 2 секунды
-                setTimeout(() => {
-                    if (this.loader) {
-                        this.loader.style.display = 'none';
-                    }
-                }, 2000);
-                
                 console.log('Инициализация завершена');
             }
             
@@ -570,13 +562,12 @@
                 
                 const startSpeed = this.currentRotationSpeed;
                 const startTime = performance.now();
-                const duration = 500; // 0.5 секунды для плавности
+                const duration = 500;
                 
                 const animate = (currentTime) => {
                     const elapsed = currentTime - startTime;
                     const progress = Math.min(elapsed / duration, 1);
                     
-                    // Плавное изменение скорости (ease-out)
                     this.currentRotationSpeed = startSpeed + (targetSpeed - startSpeed) * (1 - Math.pow(1 - progress, 3));
                     
                     if (progress < 1) {
@@ -598,7 +589,7 @@
                     // Останавливаем музыку и вращение
                     this.bgMusic.pause();
                     this.isMusicPlaying = false;
-                    this.animateRotationSpeed(0); // Плавно останавливаем вращение
+                    this.animateRotationSpeed(0);
                     
                     // Анимация пульсации при остановке
                     this.animateHeadClick(false);
@@ -609,7 +600,7 @@
                     this.bgMusic.play()
                         .then(() => {
                             this.isMusicPlaying = true;
-                            this.animateRotationSpeed(0.0038); // Плавно запускаем вращение
+                            this.animateRotationSpeed(0.0038);
                             
                             // Анимация пульсации при запуске
                             this.animateHeadClick(true);
@@ -618,7 +609,6 @@
                         })
                         .catch(e => {
                             console.log('Не удалось включить музыку:', e);
-                            // На мобильных устройствах может потребоваться взаимодействие
                         });
                 }
             }
@@ -639,12 +629,10 @@
                     progress = Math.min(elapsed / duration, 1);
                     
                     if (progress < 0.5) {
-                        // Увеличение
                         const t = progress * 2;
                         const scale = originalScale * (1 + t * 0.08);
                         this.model.scale.set(scale, scale, scale);
                     } else {
-                        // Возврат
                         const t = (progress - 0.5) * 2;
                         const scale = originalScale * (1.08 - t * 0.08);
                         this.model.scale.set(scale, scale, scale);
@@ -802,7 +790,6 @@
                 const intersects = this.raycaster.intersectObject(this.model, true);
                 
                 if (intersects.length > 0) {
-                    // Кликнули по голове - управление музыкой и вращением
                     this.toggleMusicAndRotation();
                 }
             }
@@ -854,84 +841,55 @@
                 topLight.position.set(0, 3, 1);
                 this.scene.add(topLight);
                 
-                // Создаем заглушку
-                this.createPlaceholderHead();
-            }
-            
-            createPlaceholderHead() {
-                console.log('Создаем заглушку');
+                // Загружаем ТВОЮ 3D модель (без заглушки)
+                const loader = new GLTFLoader();
                 
-                const geometry = new THREE.SphereGeometry(1, 64, 64);
-                const material = new THREE.MeshStandardMaterial({ 
-                    color: 0xffffff,
-                    roughness: 0.2,
-                    metalness: 0.1,
-                    emissive: 0x222222
-                });
-                const head = new THREE.Mesh(geometry, material);
-                
-                // Глаза
-                const eyeGeo = new THREE.SphereGeometry(0.15, 32, 32);
-                const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-                
-                const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye1.position.set(-0.35, 0.3, 0.9);
-                head.add(eye1);
-                
-                const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-                eye2.position.set(0.35, 0.3, 0.9);
-                head.add(eye2);
-                
-                // Блики
-                const sparkleGeo = new THREE.SphereGeometry(0.04, 16, 16);
-                const sparkleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-                
-                const sparkle1 = new THREE.Mesh(sparkleGeo, sparkleMat);
-                sparkle1.position.set(-0.3, 0.35, 0.98);
-                head.add(sparkle1);
-                
-                const sparkle2 = new THREE.Mesh(sparkleGeo, sparkleMat);
-                sparkle2.position.set(0.4, 0.35, 0.98);
-                head.add(sparkle2);
-                
-                // Румянец
-                const blushGeo = new THREE.SphereGeometry(0.1, 16, 16);
-                const blushMat = new THREE.MeshStandardMaterial({ color: 0xffaaaa });
-                
-                const blush1 = new THREE.Mesh(blushGeo, blushMat);
-                blush1.position.set(-0.7, 0.1, 0.7);
-                head.add(blush1);
-                
-                const blush2 = new THREE.Mesh(blushGeo, blushMat);
-                blush2.position.set(0.7, 0.1, 0.7);
-                head.add(blush2);
-                
-                // Ротик
-                const mouthGeo = new THREE.TorusGeometry(0.2, 0.03, 16, 32, Math.PI);
-                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff6666 });
-                const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-                mouth.rotation.x = Math.PI / 2;
-                mouth.rotation.z = Math.PI;
-                mouth.position.set(0, -0.15, 0.85);
-                head.add(mouth);
-                
-                this.model = head;
-                this.scene.add(this.model);
-                this.originalScale = 1;
-                
-                if (this.loader) {
-                    this.loader.style.display = 'none';
-                }
+                loader.load(
+                    'anime-head.glb', // твой файл
+                    (gltf) => {
+                        console.log('Модель загружена!');
+                        this.model = gltf.scene;
+                        
+                        // Центрируем
+                        const box = new THREE.Box3().setFromObject(this.model);
+                        const center = box.getCenter(new THREE.Vector3());
+                        this.model.position.sub(center);
+                        
+                        // Масштабируем
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 2.2 / maxDim;
+                        this.model.scale.set(scale, scale, scale);
+                        this.originalScale = scale;
+                        
+                        this.scene.add(this.model);
+                        
+                        if (this.loader) {
+                            this.loader.style.display = 'none';
+                        }
+                    },
+                    (xhr) => {
+                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                        if (this.loader) {
+                            this.loader.textContent = `✨ ${percent}% ✨`;
+                        }
+                    },
+                    (error) => {
+                        console.error('Ошибка загрузки модели:', error);
+                        alert('3D модель не найдена! Проверьте файл anime-head.glb');
+                        if (this.loader) {
+                            this.loader.textContent = '❌ МОДЕЛЬ НЕ НАЙДЕНА';
+                        }
+                    }
+                );
             }
             
             animate() {
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // Используем текущую скорость вращения (плавно изменяется)
                     this.model.rotation.y += this.currentRotationSpeed;
                     
-                    // Покачивание вверх-вниз (всегда работает, даже когда музыка выключена)
                     const time = this.clock.getElapsedTime();
                     this.model.position.y = Math.sin(time * 1.5) * 0.15;
                 }
@@ -959,7 +917,6 @@
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
                         
-                        // При переходе в хоррор останавливаем музыку если играет
                         if (this.isMusicPlaying) {
                             this.bgMusic.pause();
                             this.isMusicPlaying = false;
