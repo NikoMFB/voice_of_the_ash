@@ -113,7 +113,6 @@
             line-height: 1;
             transition: opacity 0.2s ease;
             pointer-events: auto;
-            text-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
 
         .skip-cross:hover,
@@ -136,7 +135,6 @@
             line-height: 1;
             transition: opacity 0.2s ease;
             pointer-events: auto;
-            text-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
 
         .skip-cross2:hover,
@@ -178,62 +176,42 @@
             pointer-events: none;
         }
 
+        /* КОНТЕЙНЕР ДЛЯ 3D - ПОВЕРХ ВСЕГО */
         #canvas-container {
             width: 100%;
             height: 100%;
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 5;
+            z-index: 100; /* Очень высокий z-index */
+            pointer-events: auto; /* Чтобы можно было кликать */
         }
 
-        /* ТЕКСТ В СТИЛЕ VOLUME 4 - КАПСЛОК, БЕЛЫЙ */
+        /* ТЕКСТ - БЕЗ ТЕНЕЙ */
         .fashion-text {
             position: absolute;
             left: 0;
             width: 100%;
             text-align: center;
-            z-index: 20;
+            z-index: 50; /* Выше фона, но ниже 3D */
             font-family: 'Impact', 'Arial Black', 'Helvetica Bold', sans-serif;
             color: white;
             text-transform: uppercase;
             letter-spacing: 4px;
-            text-shadow: 
-                2px 2px 0 rgba(0,0,0,0.3),
-                4px 4px 0 rgba(0,0,0,0.2),
-                8px 8px 10px rgba(0,0,0,0.4);
-            pointer-events: none;
             font-weight: 900;
             transform: scaleY(1.1);
+            pointer-events: none; /* Чтобы не мешать кликам по 3D */
+            /* ТЕНИ ПОЛНОСТЬЮ УБРАНЫ */
         }
 
         .text-top {
             top: 15%;
             font-size: 42px;
-            animation: textGlow 3s ease-in-out infinite;
         }
 
         .text-bottom {
             bottom: 15%;
             font-size: 58px;
-            animation: textGlow 3s ease-in-out infinite reverse;
-        }
-
-        @keyframes textGlow {
-            0%, 100% { 
-                text-shadow: 
-                    2px 2px 0 rgba(0,0,0,0.3),
-                    4px 4px 0 rgba(0,0,0,0.2),
-                    8px 8px 10px rgba(0,0,0,0.4);
-                opacity: 0.95;
-            }
-            50% { 
-                text-shadow: 
-                    2px 2px 0 rgba(0,0,0,0.3),
-                    4px 4px 0 rgba(0,0,0,0.2),
-                    12px 12px 20px rgba(0,0,0,0.5);
-                opacity: 1;
-            }
         }
 
         .click-hint {
@@ -244,7 +222,7 @@
             color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
             font-family: 'Impact', 'Arial Black', sans-serif;
-            z-index: 30;
+            z-index: 50;
             background: rgba(0, 0, 0, 0.2);
             padding: 8px 20px;
             border-radius: 30px;
@@ -268,7 +246,7 @@
             color: white;
             font-family: 'Impact', 'Arial Black', sans-serif;
             font-size: 16px;
-            z-index: 20;
+            z-index: 50;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px 20px;
             border-radius: 30px;
@@ -383,18 +361,20 @@
             <div class="skip-cross" id="skipButton">✕</div>
             
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ (закомментировано, пока не загрузишь видео) -->
-                 <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
+                <!-- ВИДЕО НА ФОНЕ (раскомментируй, когда загрузишь видео) -->
+                <!-- <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
-                </video>
+                </video> -->
                 
+                <!-- Временный градиент вместо видео -->
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #1a1a1a 0%, #333333 100%); z-index: 1;"></div>
                 
                 <div class="overlay"></div>
                 
-                <!-- 3D ГОЛОВА -->
+                <!-- 3D ГОЛОВА - ТЕПЕРЬ ТОЧНО ПОВЕРХ ВСЕГО (z-index: 100) -->
                 <div id="canvas-container"></div>
                 
-                <!-- ТЕКСТ В СТИЛЕ VOLUME 4 -->
+                <!-- ТЕКСТ - БЕЗ ТЕНЕЙ -->
                 <div class="fashion-text text-top">HAPPY BIRTHDAY</div>
                 <div class="fashion-text text-bottom">MELINA</div>
                 
@@ -556,12 +536,12 @@
                 this.audio.addEventListener('ended', () => this.onEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
                 
-                // Сразу запускаем 3D с заглушкой
+                // Сразу запускаем 3D
                 setTimeout(() => {
                     this.init3D();
                 }, 100);
                 
-                // Скрываем загрузчик через 2 секунды, даже если модель не загрузилась
+                // Скрываем загрузчик через 2 секунды
                 setTimeout(() => {
                     if (this.loader) {
                         this.loader.style.display = 'none';
@@ -769,7 +749,7 @@
             }
             
             init3D() {
-                console.log('Инициализация 3D с заглушкой');
+                console.log('Инициализация 3D');
                 const container = document.getElementById('canvas-container');
                 
                 if (!container) {
@@ -780,7 +760,7 @@
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x000000);
                 
-                // КАМЕРА БЛИЖЕ В 2 РАЗА
+                // КАМЕРА
                 this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
                 this.camera.position.set(0, 0, 7.5);
                 
@@ -788,12 +768,20 @@
                 this.renderer.setSize(container.clientWidth, container.clientHeight);
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.renderer.setClearColor(0x000000, 0);
+                
+                // Убеждаемся, что canvas имеет высокий z-index
+                this.renderer.domElement.style.position = 'absolute';
+                this.renderer.domElement.style.top = '0';
+                this.renderer.domElement.style.left = '0';
+                this.renderer.domElement.style.zIndex = '100';
+                this.renderer.domElement.style.pointerEvents = 'auto';
+                
                 container.appendChild(this.renderer.domElement);
                 
                 this.renderer.domElement.style.cursor = 'pointer';
                 this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
                 
-                // ЕСТЕСТВЕННОЕ БЕЛОЕ ОСВЕЩЕНИЕ
+                // ОСВЕЩЕНИЕ
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
                 this.scene.add(ambientLight);
                 
@@ -809,12 +797,12 @@
                 topLight.position.set(0, 3, 1);
                 this.scene.add(topLight);
                 
-                // Вместо загрузки модели создаем простую заглушку
+                // Создаем заглушку - стильную 3D голову
                 this.createPlaceholderHead();
             }
             
             createPlaceholderHead() {
-                console.log('Создаем заглушку - стильную 3D голову');
+                console.log('Создаем заглушку');
                 
                 // Основная голова - сфера
                 const geometry = new THREE.SphereGeometry(1, 64, 64);
@@ -884,7 +872,6 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    // СКОРОСТЬ ВРАЩЕНИЯ УВЕЛИЧЕНА НА 15%
                     this.model.rotation.y += 0.0038;
                     
                     const time = this.clock.getElapsedTime();
@@ -911,11 +898,9 @@
                 
                 setTimeout(() => {
                     if (this.transitionDirection === 'toHorror') {
-                        // Из праздника в хоррор
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
                     } else {
-                        // Из хоррора в праздник
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
                     }
@@ -927,7 +912,6 @@
             }
         }
 
-        // Запуск после загрузки страницы
         window.addEventListener('load', () => {
             console.log('Страница загружена');
             new BirthdayParty();
