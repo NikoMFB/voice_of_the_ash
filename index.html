@@ -253,32 +253,6 @@
             letter-spacing: 2px;
         }
 
-        /* КНОПКА ВКЛ/ВЫКЛ МУЗЫКИ (опционально) */
-        .music-toggle {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 10001;
-            background: rgba(0,0,0,0.3);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.2s;
-        }
-
-        .music-toggle:hover {
-            color: rgba(255, 255, 255, 0.6);
-            background: rgba(0,0,0,0.5);
-        }
-
         /* ===== СЦЕНА 2: ХОРРОР ===== */
         .horror-container {
             position: relative;
@@ -385,11 +359,8 @@
             <!-- Крестик для перехода в хоррор -->
             <div class="skip-cross" id="skipButton">✕</div>
             
-            <!-- Кнопка управления музыкой (опционально) -->
-            <div class="music-toggle" id="musicToggle">🔊</div>
-            
             <div class="fashion-page">
-                <!-- ВИДЕО НА ФОНЕ -->
+                <!-- ВИДЕО НА ФОНЕ (раскомментируй когда загрузишь) -->
                 <!-- <video class="background-video" id="bgVideo" autoplay loop muted playsinline>
                     <source src="fashion-bg.mp4" type="video/mp4">
                 </video> -->
@@ -450,7 +421,6 @@
                 this.loader = document.getElementById('modelLoader');
                 this.skipButton = document.getElementById('skipButton');
                 this.clickHint = document.getElementById('clickHint');
-                this.musicToggle = document.getElementById('musicToggle');
                 
                 // Элементы сцены 2 (хоррор)
                 this.image = document.getElementById('characterImage');
@@ -465,55 +435,12 @@
                 
                 console.log('Кнопка найдена:', this.button ? 'да' : 'нет');
                 
-                // ===== МУЗЫКА ДЛЯ СЦЕНЫ 1 =====
+                // ===== МУЗЫКА (только через нажатие на голову) =====
                 this.bgMusic = new Audio();
                 this.bgMusic.loop = true;
                 this.bgMusic.volume = 0.5;
                 this.isMusicPlaying = false;
-                
-                // Указываем файл с музыкой (замени на свой)
-                this.bgMusic.src = 'fashion-music.mp3';
-                
-                // Пытаемся включить музыку при загрузке
-                this.bgMusic.play()
-                    .then(() => {
-                        console.log('Музыка играет');
-                        this.isMusicPlaying = true;
-                        if (this.musicToggle) this.musicToggle.textContent = '🔊';
-                    })
-                    .catch(e => {
-                        console.log('Автовоспроизведение заблокировано браузером. Ждем взаимодействия пользователя');
-                        // На мобильных устройствах нужно первое касание
-                        document.addEventListener('touchstart', () => {
-                            if (!this.isMusicPlaying) {
-                                this.bgMusic.play()
-                                    .then(() => {
-                                        this.isMusicPlaying = true;
-                                        if (this.musicToggle) this.musicToggle.textContent = '🔊';
-                                    })
-                                    .catch(err => console.log('Все еще не получается:', err));
-                            }
-                        }, { once: true });
-                    });
-                
-                // Кнопка вкл/выкл музыки
-                if (this.musicToggle) {
-                    this.musicToggle.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (this.isMusicPlaying) {
-                            this.bgMusic.pause();
-                            this.isMusicPlaying = false;
-                            this.musicToggle.textContent = '🔈';
-                        } else {
-                            this.bgMusic.play()
-                                .then(() => {
-                                    this.isMusicPlaying = true;
-                                    this.musicToggle.textContent = '🔊';
-                                })
-                                .catch(err => console.log('Не удалось включить музыку'));
-                        }
-                    });
-                }
+                this.bgMusic.src = 'birthday-music.mp3'; // Имя файла как просили
                 
                 // Аудио файлы для второй сцены
                 this.audioFiles = {
@@ -569,6 +496,11 @@
                 this.originalScale = 1;
                 this.isAnimating = false;
                 
+                // Для плавной остановки вращения
+                this.targetRotationSpeed = 0.0038;
+                this.currentRotationSpeed = 0.0038;
+                this.rotationAnimation = null;
+                
                 this.raycaster = new THREE.Raycaster();
                 this.mouse = new THREE.Vector2();
                 
@@ -586,11 +518,6 @@
                         e.stopPropagation();
                         console.log('Крестик нажат - переход к хоррору');
                         
-                        // При переходе в хоррор, убавляем музыку
-                        if (this.isMusicPlaying) {
-                            this.bgMusic.volume = 0.2;
-                        }
-                        
                         this.transitionDirection = 'toHorror';
                         this.playTransition();
                     });
@@ -602,11 +529,6 @@
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Крестик в хорроре нажат - возврат к празднику');
-                        
-                        // При возврате в праздник, возвращаем громкость
-                        if (this.isMusicPlaying) {
-                            this.bgMusic.volume = 0.5;
-                        }
                         
                         this.transitionDirection = 'toParty';
                         this.playTransition();
@@ -639,6 +561,105 @@
                 }, 2000);
                 
                 console.log('Инициализация завершена');
+            }
+            
+            // Функция для плавного изменения скорости вращения
+            animateRotationSpeed(targetSpeed) {
+                if (this.rotationAnimation) {
+                    cancelAnimationFrame(this.rotationAnimation);
+                }
+                
+                const startSpeed = this.currentRotationSpeed;
+                const startTime = performance.now();
+                const duration = 500; // 0.5 секунды для плавности
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Плавное изменение скорости (ease-out)
+                    this.currentRotationSpeed = startSpeed + (targetSpeed - startSpeed) * (1 - Math.pow(1 - progress, 3));
+                    
+                    if (progress < 1) {
+                        this.rotationAnimation = requestAnimationFrame(animate);
+                    } else {
+                        this.currentRotationSpeed = targetSpeed;
+                        this.rotationAnimation = null;
+                    }
+                };
+                
+                this.rotationAnimation = requestAnimationFrame(animate);
+            }
+            
+            // Обработчик клика по голове - управление музыкой и вращением
+            toggleMusicAndRotation() {
+                if (!this.model) return;
+                
+                if (this.isMusicPlaying) {
+                    // Останавливаем музыку и вращение
+                    this.bgMusic.pause();
+                    this.isMusicPlaying = false;
+                    this.animateRotationSpeed(0); // Плавно останавливаем вращение
+                    
+                    // Анимация пульсации при остановке
+                    this.animateHeadClick(false);
+                    
+                    console.log('Музыка остановлена');
+                } else {
+                    // Включаем музыку и вращение
+                    this.bgMusic.play()
+                        .then(() => {
+                            this.isMusicPlaying = true;
+                            this.animateRotationSpeed(0.0038); // Плавно запускаем вращение
+                            
+                            // Анимация пульсации при запуске
+                            this.animateHeadClick(true);
+                            
+                            console.log('Музыка играет');
+                        })
+                        .catch(e => {
+                            console.log('Не удалось включить музыку:', e);
+                            // На мобильных устройствах может потребоваться взаимодействие
+                        });
+                }
+            }
+            
+            // Анимация пульсации при клике
+            animateHeadClick(playMusic = true) {
+                if (this.isAnimating || !this.model) return;
+                
+                this.isAnimating = true;
+                
+                const originalScale = this.model.scale.x;
+                let progress = 0;
+                const duration = 400;
+                const startTime = performance.now();
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    progress = Math.min(elapsed / duration, 1);
+                    
+                    if (progress < 0.5) {
+                        // Увеличение
+                        const t = progress * 2;
+                        const scale = originalScale * (1 + t * 0.08);
+                        this.model.scale.set(scale, scale, scale);
+                    } else {
+                        // Возврат
+                        const t = (progress - 0.5) * 2;
+                        const scale = originalScale * (1.08 - t * 0.08);
+                        this.model.scale.set(scale, scale, scale);
+                    }
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        this.model.scale.set(originalScale, originalScale, originalScale);
+                        this.isAnimating = false;
+                    }
+                };
+                
+                requestAnimationFrame(animate);
             }
             
             onButtonClick() {
@@ -769,58 +790,6 @@
                 this.isPlaying = false;
             }
             
-            animateHeadClick() {
-                if (this.isAnimating || !this.model) return;
-                
-                console.log('Клик по голове!');
-                this.isAnimating = true;
-                
-                this.originalScale = this.model.scale.x;
-                
-                let progress = 0;
-                const duration = 600;
-                const startTime = performance.now();
-                
-                const currentY = this.model.position.y;
-                
-                const animate = (currentTime) => {
-                    const elapsed = currentTime - startTime;
-                    progress = Math.min(elapsed / duration, 1);
-                    
-                    if (progress < 0.33) {
-                        const t = progress * 3;
-                        const scale = this.originalScale * (1 + t * 0.1);
-                        this.model.scale.set(scale, scale, scale);
-                    } else if (progress < 0.66) {
-                        const t = (progress - 0.33) * 3;
-                        const scale = this.originalScale * (1.1 - t * 0.165);
-                        this.model.scale.set(scale, scale, scale);
-                    } else {
-                        const t = (progress - 0.66) * 3;
-                        const scale = this.originalScale * (0.935 + t * 0.065);
-                        this.model.scale.set(scale, scale, scale);
-                    }
-                    
-                    this.model.position.y = currentY;
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(animate);
-                    } else {
-                        this.model.scale.set(this.originalScale, this.originalScale, this.originalScale);
-                        this.isAnimating = false;
-                        
-                        if (this.clickHint) {
-                            this.clickHint.style.opacity = '0';
-                            setTimeout(() => {
-                                if (this.clickHint) this.clickHint.style.display = 'none';
-                            }, 1000);
-                        }
-                    }
-                };
-                
-                requestAnimationFrame(animate);
-            }
-            
             onCanvasClick(event) {
                 if (!this.model || this.isAnimating) return;
                 
@@ -834,7 +803,8 @@
                 const intersects = this.raycaster.intersectObject(this.model, true);
                 
                 if (intersects.length > 0) {
-                    this.animateHeadClick();
+                    // Кликнули по голове - управление музыкой и вращением
+                    this.toggleMusicAndRotation();
                 }
             }
             
@@ -959,8 +929,10 @@
                 requestAnimationFrame(() => this.animate());
                 
                 if (this.model && !this.isAnimating) {
-                    this.model.rotation.y += 0.0038;
+                    // Используем текущую скорость вращения (плавно изменяется)
+                    this.model.rotation.y += this.currentRotationSpeed;
                     
+                    // Покачивание вверх-вниз (всегда работает, даже когда музыка выключена)
                     const time = this.clock.getElapsedTime();
                     this.model.position.y = Math.sin(time * 1.5) * 0.15;
                 }
@@ -987,6 +959,13 @@
                     if (this.transitionDirection === 'toHorror') {
                         this.page1.classList.add('hidden');
                         this.page2.classList.add('visible');
+                        
+                        // При переходе в хоррор останавливаем музыку если играет
+                        if (this.isMusicPlaying) {
+                            this.bgMusic.pause();
+                            this.isMusicPlaying = false;
+                            this.animateRotationSpeed(0);
+                        }
                     } else {
                         this.page2.classList.remove('visible');
                         this.page1.classList.remove('hidden');
